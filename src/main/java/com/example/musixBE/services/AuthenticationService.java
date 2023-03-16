@@ -93,11 +93,10 @@ public class AuthenticationService {
         );
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
-        System.out.println(user.getId());
         var token = getValidToken(user);
-        if(token.isPresent()){
+        if(token != null){
             return  AuthenticationResponse.builder()
-                    .token(token.get().getToken())
+                    .token(token.getToken())
                     .user(user)
                     .build();
         } else {
@@ -111,16 +110,17 @@ public class AuthenticationService {
         }
     }
 
-    private Optional<Token> getValidToken(User user) {
+    private Token getValidToken(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getUsername());
-        if(validUserTokens == null) return Optional.empty();
-        if(validUserTokens.isEmpty()) return Optional.empty();
+        if(validUserTokens == null) return null;
+        if(validUserTokens.isEmpty()) return null;
+        System.out.println(validUserTokens.size());
         validUserTokens.sort((a, b) -> Math.toIntExact(b.getDateExpired() - a.getDateExpired()));
         for (Token validUserToken : validUserTokens) {
             if(!validUserToken.isExpired() && !validUserToken.isRevoked()){
-                return Optional.of(validUserToken);
+                return validUserToken;
             }
         }
-        return  Optional.empty();
+        return  null;
     }
 }
