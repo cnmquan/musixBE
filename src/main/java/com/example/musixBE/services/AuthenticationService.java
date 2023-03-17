@@ -6,12 +6,15 @@ import com.example.musixBE.models.TokenType;
 import com.example.musixBE.models.User;
 import com.example.musixBE.payloads.requests.AuthenticationRequest;
 import com.example.musixBE.payloads.requests.RegisterRequest;
+import com.example.musixBE.payloads.responses.AuthenticationFailedResponse;
 import com.example.musixBE.payloads.responses.AuthenticationResponse;
+import com.example.musixBE.payloads.responses.AuthenticationSuccessResponse;
 import com.example.musixBE.repositories.TokenRepository;
 import com.example.musixBE.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,27 +34,52 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
-                .username(request.getUsername())
-                .fullName(request.getFullName())
-                .email(request.getEmail())
-                .birthday(request.getBirthday())
-                .phoneNumber(request.getPhoneNumber())
-                .tokens(new ArrayList<>())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
-                .build();
-        var userSaved = userRepository.save(user);
-        var jwtToken = jwtService.generatedToken(user);
-        var token = saveUserToken(userSaved, jwtToken);
-        var userSaveUpdated = updateUserToken(userSaved, token);
-        return  AuthenticationResponse.builder()
-                .user(userSaveUpdated)
-                .token(jwtToken)
-                .build();
+        // Check username is existed in database
+        boolean isExistedUser = userRepository.findByUsernameOrEmail(request.getUsername(), request.getEmail()).isEmpty();
+        if (!isExistedUser) {
+            // Catch username is existed in database
+            return AuthenticationFailedResponse.builder()
+                    .status(452)
+                    .msg("Username is existed")
+                    .build();
+        }
+
+        try {
+            var user = User.builder()
+                    .username(request.getUsername())
+                    .fullName(request.getFullName())
+                    .email(request.getEmail())
+                    .birthday(request.getBirthday())
+                    .phoneNumber(request.getPhoneNumber())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .followings(new ArrayList<>())
+                    .followers(new ArrayList<>())
+                    .role(Role.USER)
+                    .build();
+
+            // Save user info to db
+            var userSaved = userRepository.save(user);
+
+            // Create jwt token and save token to db
+            var jwtToken = jwtService.generatedToken(user);
+            var token = saveUserToken(userSaved, jwtToken);
+
+            // Response
+            return AuthenticationSuccessResponse.builder()
+                    .user(userSaved)
+                    .token(token)
+                    .build();
+        } catch (Exception e) {
+            // Other Exception
+            return AuthenticationFailedResponse.builder()
+                    .status(499)
+                    .msg("Error while save data")
+                    .build();
+        }
     }
 
     private Token saveUserToken(User user, String jwtToken) {
+        Date date = new Date();
         var token = Token.builder()
                 .user(User.builder()
                         .id(user.getId())
@@ -62,65 +90,79 @@ public class AuthenticationService {
                 .tokenType(TokenType.BEARER)
                 .isExpired(false)
                 .revoked(false)
-                .dateExpired(1000L * 30 * 24 * 60 * 60)
+                .dateExpired(1000L * 30 * 24 * 60 * 60 + date.getTime())
+                .dateCreated(date.getTime())
                 .build();
         return tokenRepository.save(token);
     }
 
-    private User updateUserToken(User user, Token token){
-        var userSaved = userRepository.findByUsername(user.getUsername());
-        if (userSaved.isPresent()) {
-            List<Token> tokens = userSaved.get().getTokens();
-            tokens.add(Token.builder()
-                    .id(token.getId())
-                    .token(token.getToken())
-                    .isExpired(token.isExpired())
-                    .dateExpired(token.getDateExpired())
-                    .tokenType(token.getTokenType())
-                    .build());
-            userSaved.get().setTokens(tokens);
-            return userRepository.save(userSaved.get());
-        }
-        return null;
-    }
-
     public AuthenticationResponse authentication(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
-        var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
-        var token = getValidToken(user);
-        if(token != null){
-            return  AuthenticationResponse.builder()
-                    .token(token.getToken())
-                    .user(user)
+        try {
+            // Get User from Username
+            var user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
+
+            try {
+                // Check Username and Password correct
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getUsername(),
+                                request.getPassword()
+                        )
+                );
+            } catch (AuthenticationException exception) {
+                return AuthenticationFailedResponse.builder()
+                        .status(403).msg("Password Not Correct")
+                        .build();
+            }
+
+            // Get Token from Database
+            var token = getValidToken(user);
+            if (token != null) {
+                return AuthenticationSuccessResponse.builder()
+                        .token(token)
+                        .user(user)
+                        .build();
+            } else {
+                var jwtToken = jwtService.generatedToken(user);
+                var tokenSaved = saveUserToken(user, jwtToken);
+                return AuthenticationSuccessResponse.builder()
+                        .token(tokenSaved)
+                        .user(user)
+                        .build();
+            }
+        } catch (UsernameNotFoundException exception) {
+            return AuthenticationFailedResponse.builder()
+                    .status(453)
+                    .msg("Username Not Found")
                     .build();
-        } else {
-            var jwtToken = jwtService.generatedToken(user);
-            var tokenUpdate = saveUserToken(user, jwtToken);
-            var userUpdated = updateUserToken(user, tokenUpdate);
-            return  AuthenticationResponse.builder()
-                    .token(jwtToken)
-                    .user(userUpdated)
+        } catch (Exception e) {
+            // Other Exception
+            return AuthenticationFailedResponse.builder()
+                    .status(499)
+                    .msg("Error while save data")
                     .build();
         }
+
     }
 
     private Token getValidToken(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getUsername());
-        if(validUserTokens == null) return null;
-        if(validUserTokens.isEmpty()) return null;
+        if (validUserTokens == null) return null;
+        if (validUserTokens.isEmpty()) return null;
         System.out.println(validUserTokens.size());
         validUserTokens.sort((a, b) -> Math.toIntExact(b.getDateExpired() - a.getDateExpired()));
+        Date date = new Date();
         for (Token validUserToken : validUserTokens) {
-            if(!validUserToken.isExpired() && !validUserToken.isRevoked()){
+            if(date.getTime() >= validUserToken.getDateExpired()){
+                validUserToken.setExpired(true);
+                tokenRepository.save(validUserToken);
+                continue;
+            }
+            if (!validUserToken.isExpired() && !validUserToken.isRevoked()) {
                 return validUserToken;
             }
         }
-        return  null;
+        return null;
     }
 }
