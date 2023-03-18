@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationFailedResponse extends AuthenticationResponse {
+public class FailedResponse extends Response {
     private int status;
     private String msg;
 }

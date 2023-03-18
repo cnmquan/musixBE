@@ -28,57 +28,44 @@ public class User implements UserDetails {
     @Indexed(unique = true)
     private String username;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String password;
 
     private String email;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String fullName;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String avatarUri;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String birthday;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String phoneNumber;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Role role;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<User> followings;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<User> followers;
 
-    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
-    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return true;

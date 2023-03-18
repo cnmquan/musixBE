@@ -1,14 +1,11 @@
 package com.example.musixBE.services;
 
-import com.example.musixBE.models.Role;
-import com.example.musixBE.models.Token;
-import com.example.musixBE.models.TokenType;
-import com.example.musixBE.models.User;
+import com.example.musixBE.models.*;
 import com.example.musixBE.payloads.requests.AuthenticationRequest;
 import com.example.musixBE.payloads.requests.RegisterRequest;
-import com.example.musixBE.payloads.responses.AuthenticationFailedResponse;
+import com.example.musixBE.payloads.responses.FailedResponse;
+import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.AuthenticationResponse;
-import com.example.musixBE.payloads.responses.AuthenticationSuccessResponse;
 import com.example.musixBE.repositories.TokenRepository;
 import com.example.musixBE.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +30,17 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    private final MusixMapper musixMapper = MusixMapper.INSTANCE;
+
+
+    public Response register(RegisterRequest request) {
         // Check username is existed in database
         boolean isExistedUser = userRepository.findByUsernameOrEmail(request.getUsername(), request.getEmail()).isEmpty();
         if (!isExistedUser) {
             // Catch username is existed in database
-            return AuthenticationFailedResponse.builder()
-                    .status(452)
-                    .msg("Username is existed")
+            return FailedResponse.builder()
+                    .status(StatusList.errorUsernameExisted.getStatus())
+                    .msg(StatusList.errorUsernameExisted.getMsg())
                     .build();
         }
 
@@ -65,21 +65,20 @@ public class AuthenticationService {
             var token = saveUserToken(userSaved, jwtToken);
 
             // Response
-            return AuthenticationSuccessResponse.builder()
-                    .user(userSaved)
-                    .token(token)
+            return AuthenticationResponse.builder()
+                    .user(musixMapper.userToUserDTO(user))
+                    .token(musixMapper.tokenToTokenDTO(token))
                     .build();
         } catch (Exception e) {
             // Other Exception
-            return AuthenticationFailedResponse.builder()
-                    .status(499)
-                    .msg("Error while save data")
+            return FailedResponse.builder()
+                    .status(StatusList.errorService.getStatus())
+                    .msg(StatusList.errorService.getMsg())
                     .build();
         }
     }
 
     private Token saveUserToken(User user, String jwtToken) {
-        Date date = new Date();
         var token = Token.builder()
                 .user(User.builder()
                         .id(user.getId())
@@ -90,13 +89,13 @@ public class AuthenticationService {
                 .tokenType(TokenType.BEARER)
                 .isExpired(false)
                 .revoked(false)
-                .dateExpired(1000L * 30 * 24 * 60 * 60 + date.getTime())
-                .dateCreated(date.getTime())
+                .dateExpired(1000L * 30 * 24 * 60 * 60 + System.currentTimeMillis())
+                .dateCreated(System.currentTimeMillis())
                 .build();
         return tokenRepository.save(token);
     }
 
-    public AuthenticationResponse authentication(AuthenticationRequest request) {
+    public Response authentication(AuthenticationRequest request) {
         try {
             // Get User from Username
             var user = userRepository.findByUsername(request.getUsername())
@@ -111,36 +110,41 @@ public class AuthenticationService {
                         )
                 );
             } catch (AuthenticationException exception) {
-                return AuthenticationFailedResponse.builder()
-                        .status(403).msg("Password Not Correct")
+                return FailedResponse.builder()
+                        .status(StatusList.errorPasswordNotCorrect.getStatus())
+                        .msg(StatusList.errorPasswordNotCorrect.getMsg())
                         .build();
             }
-
             // Get Token from Database
+            UserDTO userDTO = musixMapper.userToUserDTO(user);
             var token = getValidToken(user);
             if (token != null) {
-                return AuthenticationSuccessResponse.builder()
-                        .token(token)
-                        .user(user)
+                TokenDTO tokenDTO = musixMapper.tokenToTokenDTO(token);
+                return AuthenticationResponse.builder()
+                        .token(tokenDTO)
+                        .user(userDTO)
                         .build();
             } else {
                 var jwtToken = jwtService.generatedToken(user);
                 var tokenSaved = saveUserToken(user, jwtToken);
-                return AuthenticationSuccessResponse.builder()
-                        .token(tokenSaved)
-                        .user(user)
+                TokenDTO tokenDTO = musixMapper.tokenToTokenDTO(tokenSaved);
+                return AuthenticationResponse.builder()
+                        .token(tokenDTO)
+                        .user(userDTO)
                         .build();
             }
         } catch (UsernameNotFoundException exception) {
-            return AuthenticationFailedResponse.builder()
-                    .status(453)
-                    .msg("Username Not Found")
+            return FailedResponse.builder()
+                    .status(StatusList.errorUsernameNotFound.getStatus())
+                    .msg(StatusList.errorUsernameNotFound.getMsg())
                     .build();
         } catch (Exception e) {
             // Other Exception
-            return AuthenticationFailedResponse.builder()
-                    .status(499)
-                    .msg("Error while save data")
+            System.out.println(e.getClass());
+            System.out.println(e.getMessage());
+            return FailedResponse.builder()
+                    .status(StatusList.errorService.getStatus())
+                    .msg(StatusList.errorService.getMsg())
                     .build();
         }
 
@@ -150,11 +154,9 @@ public class AuthenticationService {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getUsername());
         if (validUserTokens == null) return null;
         if (validUserTokens.isEmpty()) return null;
-        System.out.println(validUserTokens.size());
         validUserTokens.sort((a, b) -> Math.toIntExact(b.getDateExpired() - a.getDateExpired()));
-        Date date = new Date();
         for (Token validUserToken : validUserTokens) {
-            if(date.getTime() >= validUserToken.getDateExpired()){
+            if(!jwtService.isTokenValid(validUserToken.getToken(), user)){
                 validUserToken.setExpired(true);
                 tokenRepository.save(validUserToken);
                 continue;
