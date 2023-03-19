@@ -1,8 +1,7 @@
 package com.example.musixBE.payloads.responses;
 
-import com.example.musixBE.models.Token;
-import com.example.musixBE.models.TokenDTO;
-import com.example.musixBE.models.UserDTO;
+import com.example.musixBE.models.token.TokenDTO;
+import com.example.musixBE.models.user.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

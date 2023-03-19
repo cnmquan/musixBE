@@ -1,6 +1,7 @@
 package com.example.musixBE.controllers;
 
 import com.example.musixBE.payloads.requests.AuthenticationRequest;
+import com.example.musixBE.payloads.requests.LoginRequest;
 import com.example.musixBE.payloads.requests.RegisterRequest;
 import com.example.musixBE.payloads.responses.FailedResponse;
 import com.example.musixBE.payloads.responses.Response;
@@ -33,8 +34,20 @@ public class AuthenticationController {
 
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<Response> login(
+            @RequestBody LoginRequest request
+    ) {
+        Response response = service.login(request);
+        if(response.getClass() == AuthenticationResponse.class){
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(((FailedResponse)response).getStatus()).body(response);
+        }
+    }
+
     @PostMapping("/authenticate")
-    public ResponseEntity<Response> authenticate(
+    public ResponseEntity<Response> login(
             @RequestBody AuthenticationRequest request
     ) {
         Response response = service.authentication(request);

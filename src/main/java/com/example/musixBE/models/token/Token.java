@@ -1,5 +1,6 @@
-package com.example.musixBE.models;
+package com.example.musixBE.models.token;
 
+import com.example.musixBE.models.user.User;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;

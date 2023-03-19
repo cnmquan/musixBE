@@ -1,6 +1,6 @@
 package com.example.musixBE.repositories;
 
-import com.example.musixBE.models.Token;
+import com.example.musixBE.models.token.Token;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 

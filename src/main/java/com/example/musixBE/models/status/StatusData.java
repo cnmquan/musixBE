@@ -1,4 +1,4 @@
-package com.example.musixBE.models;
+package com.example.musixBE.models.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

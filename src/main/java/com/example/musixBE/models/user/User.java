@@ -1,7 +1,5 @@
-package com.example.musixBE.models;
+package com.example.musixBE.models.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -32,15 +30,9 @@ public class User implements UserDetails {
 
     private String email;
 
-    private String fullName;
-
-    private String avatarUri;
-
-    private String birthday;
-
-    private String phoneNumber;
-
     private Role role;
+
+    private Profile profile;
 
     private List<User> followings;
 

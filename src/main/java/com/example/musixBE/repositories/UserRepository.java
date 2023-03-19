@@ -1,6 +1,6 @@
 package com.example.musixBE.repositories;
 
-import com.example.musixBE.models.User;
+import com.example.musixBE.models.user.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 

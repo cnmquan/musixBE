@@ -1,5 +1,6 @@
-package com.example.musixBE.models;
+package com.example.musixBE.models.token;
 
+import com.example.musixBE.models.user.UserDTO;
 import lombok.*;
 
 @Data

@@ -1,7 +1,15 @@
 package com.example.musixBE.services;
 
-import com.example.musixBE.models.*;
+import com.example.musixBE.models.status.StatusList;
+import com.example.musixBE.models.token.Token;
+import com.example.musixBE.models.token.TokenDTO;
+import com.example.musixBE.models.token.TokenType;
+import com.example.musixBE.models.user.Profile;
+import com.example.musixBE.models.user.Role;
+import com.example.musixBE.models.user.User;
+import com.example.musixBE.models.user.UserDTO;
 import com.example.musixBE.payloads.requests.AuthenticationRequest;
+import com.example.musixBE.payloads.requests.LoginRequest;
 import com.example.musixBE.payloads.requests.RegisterRequest;
 import com.example.musixBE.payloads.responses.FailedResponse;
 import com.example.musixBE.payloads.responses.Response;
@@ -45,12 +53,15 @@ public class AuthenticationService {
         }
 
         try {
-            var user = User.builder()
-                    .username(request.getUsername())
+            var profile = Profile.builder()
                     .fullName(request.getFullName())
-                    .email(request.getEmail())
                     .birthday(request.getBirthday())
                     .phoneNumber(request.getPhoneNumber())
+                    .build();
+            var user = User.builder()
+                    .username(request.getUsername())
+                    .profile(profile)
+                    .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .followings(new ArrayList<>())
                     .followers(new ArrayList<>())
@@ -97,24 +108,69 @@ public class AuthenticationService {
 
     public Response authentication(AuthenticationRequest request) {
         try {
-            // Get User from Username
-            var user = userRepository.findByUsername(request.getUsername())
-                    .orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
+            var token = tokenRepository.findByToken(request.getToken())
+                    .orElseThrow(() -> new Exception(StatusList.errorTokenNotFound.getMsg()));
 
-            try {
-                // Check Username and Password correct
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                request.getUsername(),
-                                request.getPassword()
-                        )
-                );
-            } catch (AuthenticationException exception) {
+            if (token.isRevoked() || token.isExpired()){
+                throw  new Exception(StatusList.errorTokenNotValid.getMsg());
+            }
+
+            var user = userRepository.findByUsername(token.getUser().getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException(StatusList.errorUsernameNotFound.getMsg()));
+
+            if (!jwtService.isTokenValid(token.getToken(), user)) {
+                token.setExpired(true);
+                token.setRevoked(true);
+                tokenRepository.save(token);
+                throw  new Exception(StatusList.errorTokenNotValid.getMsg());
+            }
+
+            UserDTO userDTO = musixMapper.userToUserDTO(user);
+            TokenDTO tokenDTO = musixMapper.tokenToTokenDTO(token);
+            return AuthenticationResponse.builder()
+                    .token(tokenDTO)
+                    .user(userDTO)
+                    .build();
+        } catch (UsernameNotFoundException exception) {
+            return FailedResponse.builder()
+                    .status(StatusList.errorUsernameNotFound.getStatus())
+                    .msg(StatusList.errorUsernameNotFound.getMsg())
+                    .build();
+        }  catch (Exception e) {
+            if (e.getMessage().equals(StatusList.errorTokenNotFound.getMsg())) {
                 return FailedResponse.builder()
-                        .status(StatusList.errorPasswordNotCorrect.getStatus())
-                        .msg(StatusList.errorPasswordNotCorrect.getMsg())
+                        .status(StatusList.errorTokenNotFound.getStatus())
+                        .msg(StatusList.errorTokenNotFound.getMsg())
+                        .build();
+            } else if (e.getMessage().equals(StatusList.errorTokenNotValid.getMsg())) {
+                return FailedResponse.builder()
+                        .status(StatusList.errorTokenNotValid.getStatus())
+                        .msg(StatusList.errorTokenNotValid.getMsg())
                         .build();
             }
+            else {
+                return FailedResponse.builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(StatusList.errorService.getMsg())
+                        .build();
+            }
+        }
+
+    }
+
+    public Response login(LoginRequest request) {
+        try {
+            // Get User from Username
+            var user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException(StatusList.errorUsernameNotFound.getMsg()));
+            // Check Username and Password correct
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+
             // Get Token from Database
             UserDTO userDTO = musixMapper.userToUserDTO(user);
             var token = getValidToken(user);
@@ -138,10 +194,12 @@ public class AuthenticationService {
                     .status(StatusList.errorUsernameNotFound.getStatus())
                     .msg(StatusList.errorUsernameNotFound.getMsg())
                     .build();
+        } catch (AuthenticationException exception) {
+            return FailedResponse.builder()
+                    .status(StatusList.errorPasswordNotCorrect.getStatus())
+                    .msg(StatusList.errorPasswordNotCorrect.getMsg())
+                    .build();
         } catch (Exception e) {
-            // Other Exception
-            System.out.println(e.getClass());
-            System.out.println(e.getMessage());
             return FailedResponse.builder()
                     .status(StatusList.errorService.getStatus())
                     .msg(StatusList.errorService.getMsg())
@@ -156,7 +214,7 @@ public class AuthenticationService {
         if (validUserTokens.isEmpty()) return null;
         validUserTokens.sort((a, b) -> Math.toIntExact(b.getDateExpired() - a.getDateExpired()));
         for (Token validUserToken : validUserTokens) {
-            if(!jwtService.isTokenValid(validUserToken.getToken(), user)){
+            if (!jwtService.isTokenValid(validUserToken.getToken(), user)) {
                 validUserToken.setExpired(true);
                 tokenRepository.save(validUserToken);
                 continue;
