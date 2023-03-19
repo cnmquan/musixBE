@@ -1,7 +1,10 @@
 package com.example.musixBE.controllers;
 
 import com.example.musixBE.payloads.requests.AuthenticationRequest;
+import com.example.musixBE.payloads.requests.LoginRequest;
 import com.example.musixBE.payloads.requests.RegisterRequest;
+import com.example.musixBE.payloads.responses.FailedResponse;
+import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.AuthenticationResponse;
 import com.example.musixBE.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
@@ -19,17 +22,40 @@ public class AuthenticationController {
     private final AuthenticationService service;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<Response> register(
             @RequestBody RegisterRequest request
     ) {
-        return ResponseEntity.ok(service.register(request));
+        Response response = service.register(request);
+        if(response.getClass() == AuthenticationResponse.class){
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(((FailedResponse)response).getStatus()).body(response);
+        }
+
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Response> login(
+            @RequestBody LoginRequest request
+    ) {
+        Response response = service.login(request);
+        if(response.getClass() == AuthenticationResponse.class){
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(((FailedResponse)response).getStatus()).body(response);
+        }
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(
+    public ResponseEntity<Response> login(
             @RequestBody AuthenticationRequest request
     ) {
-        return ResponseEntity.ok(service.authentication(request));
+        Response response = service.authentication(request);
+        if(response.getClass() == AuthenticationResponse.class){
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(((FailedResponse)response).getStatus()).body(response);
+        }
     }
 
 

@@ -1,4 +1,4 @@
-package com.example.musixBE.models;
+package com.example.musixBE.models.user;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -30,17 +30,9 @@ public class User implements UserDetails {
 
     private String email;
 
-    private String fullName;
-
-    private String avatarUri;
-
-    private String birthday;
-
-    private String phoneNumber;
-
     private Role role;
 
-    private List<Token> tokens;
+    private Profile profile;
 
     private List<User> followings;
 

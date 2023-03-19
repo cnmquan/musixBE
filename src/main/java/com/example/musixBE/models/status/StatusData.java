@@ -1,4 +1,4 @@
-package com.example.musixBE.payloads.requests;
+package com.example.musixBE.models.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class AuthenticationRequest extends Request {
-    private String token;
+@NoArgsConstructor
+public class StatusData {
+    private int status;
+    private String msg;
 }
