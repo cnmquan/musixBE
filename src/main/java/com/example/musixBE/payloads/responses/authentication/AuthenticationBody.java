@@ -1,4 +1,4 @@
-package com.example.musixBE.payloads.responses;
+package com.example.musixBE.payloads.responses.authentication;
 
 import com.example.musixBE.models.token.TokenDTO;
 import com.example.musixBE.models.user.UserDTO;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse extends Response {
+public class AuthenticationBody {
     private UserDTO user;
     private TokenDTO token;
 }
