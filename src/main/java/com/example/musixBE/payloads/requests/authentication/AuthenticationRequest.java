@@ -1,5 +1,6 @@
-package com.example.musixBE.payloads.requests;
+package com.example.musixBE.payloads.requests.authentication;
 
+import com.example.musixBE.payloads.requests.Request;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

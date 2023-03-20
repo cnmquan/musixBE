@@ -1,21 +1,20 @@
-package com.example.musixBE.services;
+package com.example.musixBE.services.user;
 
 import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.token.Token;
-import com.example.musixBE.models.token.TokenDTO;
 import com.example.musixBE.models.token.TokenType;
 import com.example.musixBE.models.user.Profile;
 import com.example.musixBE.models.user.Role;
 import com.example.musixBE.models.user.User;
-import com.example.musixBE.models.user.UserDTO;
-import com.example.musixBE.payloads.requests.AuthenticationRequest;
-import com.example.musixBE.payloads.requests.LoginRequest;
-import com.example.musixBE.payloads.requests.RegisterRequest;
-import com.example.musixBE.payloads.responses.FailedResponse;
+import com.example.musixBE.payloads.requests.authentication.AuthenticationRequest;
+import com.example.musixBE.payloads.requests.authentication.LoginRequest;
+import com.example.musixBE.payloads.requests.authentication.RegisterRequest;
 import com.example.musixBE.payloads.responses.Response;
-import com.example.musixBE.payloads.responses.AuthenticationResponse;
+import com.example.musixBE.payloads.responses.authentication.AuthenticationBody;
 import com.example.musixBE.repositories.TokenRepository;
 import com.example.musixBE.repositories.UserRepository;
+import com.example.musixBE.services.JwtService;
+import com.example.musixBE.services.MusixMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,12 +40,12 @@ public class AuthenticationService {
     private final MusixMapper musixMapper = MusixMapper.INSTANCE;
 
 
-    public Response register(RegisterRequest request) {
+    public Response<AuthenticationBody> register(RegisterRequest request) {
         // Check username is existed in database
         boolean isExistedUser = userRepository.findByUsernameOrEmail(request.getUsername(), request.getEmail()).isEmpty();
         if (!isExistedUser) {
             // Catch username is existed in database
-            return FailedResponse.builder()
+            return Response.<AuthenticationBody>builder()
                     .status(StatusList.errorUsernameExisted.getStatus())
                     .msg(StatusList.errorUsernameExisted.getMsg())
                     .build();
@@ -76,13 +75,17 @@ public class AuthenticationService {
             var token = saveUserToken(userSaved, jwtToken);
 
             // Response
-            return AuthenticationResponse.builder()
-                    .user(musixMapper.userToUserDTO(user))
-                    .token(musixMapper.tokenToTokenDTO(token))
+            return Response.<AuthenticationBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(AuthenticationBody.builder()
+                            .user(musixMapper.userToUserDTO(user))
+                            .token(musixMapper.tokenToTokenDTO(token))
+                            .build())
                     .build();
         } catch (Exception e) {
             // Other Exception
-            return FailedResponse.builder()
+            return Response.<AuthenticationBody>builder()
                     .status(StatusList.errorService.getStatus())
                     .msg(StatusList.errorService.getMsg())
                     .build();
@@ -106,7 +109,7 @@ public class AuthenticationService {
         return tokenRepository.save(token);
     }
 
-    public Response authentication(AuthenticationRequest request) {
+    public Response<AuthenticationBody> authentication(AuthenticationRequest request) {
         try {
             var token = tokenRepository.findByToken(request.getToken())
                     .orElseThrow(() -> new Exception(StatusList.errorTokenNotFound.getMsg()));
@@ -125,31 +128,33 @@ public class AuthenticationService {
                 throw  new Exception(StatusList.errorTokenNotValid.getMsg());
             }
 
-            UserDTO userDTO = musixMapper.userToUserDTO(user);
-            TokenDTO tokenDTO = musixMapper.tokenToTokenDTO(token);
-            return AuthenticationResponse.builder()
-                    .token(tokenDTO)
-                    .user(userDTO)
+            return Response.<AuthenticationBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(AuthenticationBody.builder()
+                            .user(musixMapper.userToUserDTO(user))
+                            .token(musixMapper.tokenToTokenDTO(token))
+                            .build())
                     .build();
         } catch (UsernameNotFoundException exception) {
-            return FailedResponse.builder()
+            return Response.<AuthenticationBody>builder()
                     .status(StatusList.errorUsernameNotFound.getStatus())
                     .msg(StatusList.errorUsernameNotFound.getMsg())
                     .build();
         }  catch (Exception e) {
             if (e.getMessage().equals(StatusList.errorTokenNotFound.getMsg())) {
-                return FailedResponse.builder()
+                return Response.<AuthenticationBody>builder()
                         .status(StatusList.errorTokenNotFound.getStatus())
                         .msg(StatusList.errorTokenNotFound.getMsg())
                         .build();
             } else if (e.getMessage().equals(StatusList.errorTokenNotValid.getMsg())) {
-                return FailedResponse.builder()
+                return Response.<AuthenticationBody>builder()
                         .status(StatusList.errorTokenNotValid.getStatus())
                         .msg(StatusList.errorTokenNotValid.getMsg())
                         .build();
             }
             else {
-                return FailedResponse.builder()
+                return Response.<AuthenticationBody>builder()
                         .status(StatusList.errorService.getStatus())
                         .msg(StatusList.errorService.getMsg())
                         .build();
@@ -158,7 +163,7 @@ public class AuthenticationService {
 
     }
 
-    public Response login(LoginRequest request) {
+    public Response<AuthenticationBody> login(LoginRequest request) {
         try {
             // Get User from Username
             var user = userRepository.findByUsername(request.getUsername())
@@ -172,35 +177,40 @@ public class AuthenticationService {
             );
 
             // Get Token from Database
-            UserDTO userDTO = musixMapper.userToUserDTO(user);
             var token = getValidToken(user);
             if (token != null) {
-                TokenDTO tokenDTO = musixMapper.tokenToTokenDTO(token);
-                return AuthenticationResponse.builder()
-                        .token(tokenDTO)
-                        .user(userDTO)
+                return Response.<AuthenticationBody>builder()
+                        .status(StatusList.successService.getStatus())
+                        .msg(StatusList.successService.getMsg())
+                        .data(AuthenticationBody.builder()
+                                .user(musixMapper.userToUserDTO(user))
+                                .token(musixMapper.tokenToTokenDTO(token))
+                                .build())
                         .build();
             } else {
                 var jwtToken = jwtService.generatedToken(user);
                 var tokenSaved = saveUserToken(user, jwtToken);
-                TokenDTO tokenDTO = musixMapper.tokenToTokenDTO(tokenSaved);
-                return AuthenticationResponse.builder()
-                        .token(tokenDTO)
-                        .user(userDTO)
+                return Response.<AuthenticationBody>builder()
+                        .status(StatusList.successService.getStatus())
+                        .msg(StatusList.successService.getMsg())
+                        .data(AuthenticationBody.builder()
+                                .user(musixMapper.userToUserDTO(user))
+                                .token(musixMapper.tokenToTokenDTO(tokenSaved))
+                                .build())
                         .build();
             }
         } catch (UsernameNotFoundException exception) {
-            return FailedResponse.builder()
+            return Response.<AuthenticationBody>builder()
                     .status(StatusList.errorUsernameNotFound.getStatus())
                     .msg(StatusList.errorUsernameNotFound.getMsg())
                     .build();
         } catch (AuthenticationException exception) {
-            return FailedResponse.builder()
+            return Response.<AuthenticationBody>builder()
                     .status(StatusList.errorPasswordNotCorrect.getStatus())
                     .msg(StatusList.errorPasswordNotCorrect.getMsg())
                     .build();
         } catch (Exception e) {
-            return FailedResponse.builder()
+            return Response.<AuthenticationBody>builder()
                     .status(StatusList.errorService.getStatus())
                     .msg(StatusList.errorService.getMsg())
                     .build();

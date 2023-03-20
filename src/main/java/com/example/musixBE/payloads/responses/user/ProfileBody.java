@@ -1,5 +1,6 @@
-package com.example.musixBE.payloads.responses;
+package com.example.musixBE.payloads.responses.user;
 
+import com.example.musixBE.models.user.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FailedResponse extends Response {
-    private int status;
-    private String msg;
+public class ProfileBody {
+    private UserDTO user;
 }
