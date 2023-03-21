@@ -14,6 +14,8 @@ public class Profile {
 
     private String avatarUri;
 
+    private String avatarId;
+
     private String birthday;
 
     private String phoneNumber;
