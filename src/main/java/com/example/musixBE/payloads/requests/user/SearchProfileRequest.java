@@ -9,10 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProfileRequest {
-    private String id;
+public class SearchProfileRequest {
     private String fullName;
-    private String avatarUri;
-    private String birthday;
-    private String phoneNumber;
 }
