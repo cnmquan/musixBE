@@ -1,4 +1,4 @@
-package com.example.musixBE.payloads.requests.file;
+package com.example.musixBE.payloads.requests.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,11 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class AudioUploadRequest {
-    private MultipartFile thumbnail;
-    private MultipartFile audio;
-    private String name;
+@AllArgsConstructor
+public class UploadAvatarRequest {
     private String id;
+    private MultipartFile avatar;
 }
