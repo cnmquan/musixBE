@@ -12,7 +12,9 @@ import java.util.List;
 @ToString
 public class UserDTO {
     private String id;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String username;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String email;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ProfileDTO profile;

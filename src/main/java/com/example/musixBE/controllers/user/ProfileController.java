@@ -1,9 +1,6 @@
 package com.example.musixBE.controllers.user;
 
-import com.example.musixBE.payloads.requests.user.GetProfileRequest;
-import com.example.musixBE.payloads.requests.user.SearchProfileRequest;
-import com.example.musixBE.payloads.requests.user.UploadAvatarRequest;
-import com.example.musixBE.payloads.requests.user.UploadProfileRequest;
+import com.example.musixBE.payloads.requests.user.*;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.user.ListProfileBody;
 import com.example.musixBE.payloads.responses.user.ProfileBody;
@@ -42,6 +39,12 @@ public class ProfileController {
     @PostMapping("/avatar")
     public ResponseEntity<Response<ProfileBody>> uploadProfile(@ModelAttribute UploadAvatarRequest request) {
         var response = service.uploadAvatar(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PostMapping("/follow")
+    public ResponseEntity<Response<ProfileBody>> followUser(@RequestBody FollowUserRequest request) {
+        var response = service.followUser(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }
