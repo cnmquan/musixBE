@@ -5,19 +5,17 @@ import com.example.musixBE.payloads.requests.authentication.LoginRequest;
 import com.example.musixBE.payloads.requests.authentication.RegisterRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.authentication.AuthenticationBody;
+import com.example.musixBE.payloads.responses.authentication.ConfirmationBody;
+import com.example.musixBE.services.EmailSender;
 import com.example.musixBE.services.user.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-
     private final AuthenticationService service;
 
     @PostMapping("/register")
@@ -45,5 +43,9 @@ public class AuthenticationController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-
+    @GetMapping("/confirm")
+    public ResponseEntity<Response<ConfirmationBody>> confirm(@RequestParam("token") String token) {
+        var response = service.confirm(token);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }
