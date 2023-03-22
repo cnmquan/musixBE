@@ -1,4 +1,4 @@
-package com.example.musixBE.models.user;
+package com.example.musixBE.payloads.requests.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,17 +7,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class Profile {
+@NoArgsConstructor
+public class UploadProfileRequest {
+    private String id;
     private String fullName;
-
     private String avatarUri;
-
-    private String avatarId;
-
     private String birthday;
-
     private String phoneNumber;
-
 }

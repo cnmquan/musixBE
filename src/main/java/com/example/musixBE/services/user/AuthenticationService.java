@@ -72,7 +72,7 @@ public class AuthenticationService {
 
     public Response<AuthenticationBody> register(RegisterRequest request) {
         // Check username is existed in database
-        boolean isExistedUser = userRepository.findByUsernameOrEmail(request.getUsername(), request.getEmail()).isEmpty();
+        boolean isExistedUser = userRepository.findByUsername(request.getUsername()).isEmpty();
         if (!isExistedUser) {
             // Catch username is existed in database
             return Response.<AuthenticationBody>builder()

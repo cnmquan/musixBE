@@ -14,6 +14,8 @@ public class ProfileDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String avatarUri;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String avatarId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String birthday;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String phoneNumber;

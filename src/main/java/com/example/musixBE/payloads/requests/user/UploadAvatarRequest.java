@@ -4,15 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ProfileRequest {
+@AllArgsConstructor
+public class UploadAvatarRequest {
     private String id;
-    private String fullName;
-    private String avatarUri;
-    private String birthday;
-    private String phoneNumber;
+    private MultipartFile avatar;
 }
