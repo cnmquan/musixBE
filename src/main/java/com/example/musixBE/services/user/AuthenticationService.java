@@ -11,10 +11,13 @@ import com.example.musixBE.payloads.requests.authentication.LoginRequest;
 import com.example.musixBE.payloads.requests.authentication.RegisterRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.authentication.AuthenticationBody;
+import com.example.musixBE.payloads.responses.authentication.ConfirmationBody;
 import com.example.musixBE.repositories.TokenRepository;
 import com.example.musixBE.repositories.UserRepository;
+import com.example.musixBE.services.EmailService;
 import com.example.musixBE.services.JwtService;
 import com.example.musixBE.services.MusixMapper;
+import com.example.musixBE.utils.EmailTemplateProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,7 +26,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,10 +41,27 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
-
     private final MusixMapper musixMapper = MusixMapper.INSTANCE;
 
+    // This should return an HTML String
+    public String confirm(String confirmationToken) {
+        boolean isConfirmationTokenExisted = tokenRepository.findByToken(confirmationToken).isPresent();
+        if (!isConfirmationTokenExisted) {
+            return EmailTemplateProvider.buildErrorPage();
+        }
+        var token = tokenRepository.findByToken(confirmationToken).get();
+        if (token.getDateExpired() < LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()) {
+            return  EmailTemplateProvider.buildErrorPage();
+        }
+        var user = userRepository.findByUsername(token.getUser().getUsername()).get();
+        user.setEnabled(true);
+        token.setConfirmedAt(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        tokenRepository.save(token);
+        userRepository.save(user);
+        return EmailTemplateProvider.buildSuccessPage();
+    }
 
     public Response<AuthenticationBody> register(RegisterRequest request) {
         // Check username is existed in database
@@ -61,6 +84,7 @@ public class AuthenticationService {
                     .username(request.getUsername())
                     .profile(profile)
                     .email(request.getEmail())
+                    .enabled(false)
                     .password(passwordEncoder.encode(request.getPassword()))
                     .followings(new ArrayList<>())
                     .followers(new ArrayList<>())
@@ -73,6 +97,7 @@ public class AuthenticationService {
             // Create jwt token and save token to db
             var jwtToken = jwtService.generatedToken(user);
             var token = saveUserToken(userSaved, jwtToken);
+            sendVerificationEmail(userSaved.getUsername());
 
             // Response
             return Response.<AuthenticationBody>builder()
@@ -90,6 +115,44 @@ public class AuthenticationService {
                     .msg(StatusList.errorService.getMsg())
                     .build();
         }
+    }
+
+    public Response<ConfirmationBody> sendVerificationEmail(String username) {
+        // Create confirmation token and save token to db
+        String randomToken = UUID.randomUUID().toString();
+        boolean isUserExisted = userRepository.findByUsername(username).isPresent();
+        if (!isUserExisted) {
+            return Response.<ConfirmationBody>builder()
+                    .status(StatusList.errorUserIdNotFound.getStatus())
+                    .msg(StatusList.errorUserIdNotFound.getMsg())
+                    .build();
+        }
+        var user = userRepository.findByUsername(username).get();
+        saveConfirmationToken(user, randomToken);
+        String verificationLink = "http://localhost:8080/api/v1/auth/confirm?token=" + randomToken;
+        //Send verification email
+        emailService.send(user, verificationLink);
+        return Response.<ConfirmationBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
+    }
+
+    private Token saveConfirmationToken(User user, String confirmationToken) {
+        var token = Token.builder()
+                .user(User.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .build())
+                .token(confirmationToken)
+                .tokenType(TokenType.CONFIRMATION)
+                .isExpired(false)
+                .revoked(false)
+                .dateCreated(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                .dateExpired(LocalDateTime.now().plusMinutes(10).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                .build();
+        return tokenRepository.save(token);
     }
 
     private Token saveUserToken(User user, String jwtToken) {
@@ -114,8 +177,8 @@ public class AuthenticationService {
             var token = tokenRepository.findByToken(request.getToken())
                     .orElseThrow(() -> new Exception(StatusList.errorTokenNotFound.getMsg()));
 
-            if (token.isRevoked() || token.isExpired()){
-                throw  new Exception(StatusList.errorTokenNotValid.getMsg());
+            if (token.isRevoked() || token.isExpired()) {
+                throw new Exception(StatusList.errorTokenNotValid.getMsg());
             }
 
             var user = userRepository.findByUsername(token.getUser().getUsername())
@@ -125,7 +188,7 @@ public class AuthenticationService {
                 token.setExpired(true);
                 token.setRevoked(true);
                 tokenRepository.save(token);
-                throw  new Exception(StatusList.errorTokenNotValid.getMsg());
+                throw new Exception(StatusList.errorTokenNotValid.getMsg());
             }
 
             return Response.<AuthenticationBody>builder()
@@ -141,7 +204,7 @@ public class AuthenticationService {
                     .status(StatusList.errorUsernameNotFound.getStatus())
                     .msg(StatusList.errorUsernameNotFound.getMsg())
                     .build();
-        }  catch (Exception e) {
+        } catch (Exception e) {
             if (e.getMessage().equals(StatusList.errorTokenNotFound.getMsg())) {
                 return Response.<AuthenticationBody>builder()
                         .status(StatusList.errorTokenNotFound.getStatus())
@@ -152,8 +215,7 @@ public class AuthenticationService {
                         .status(StatusList.errorTokenNotValid.getStatus())
                         .msg(StatusList.errorTokenNotValid.getMsg())
                         .build();
-            }
-            else {
+            } else {
                 return Response.<AuthenticationBody>builder()
                         .status(StatusList.errorService.getStatus())
                         .msg(StatusList.errorService.getMsg())

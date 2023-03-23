@@ -38,6 +38,8 @@ public class User implements UserDetails {
 
     private List<User> followers;
 
+    private boolean enabled;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
@@ -60,6 +62,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return false;
     }
 }

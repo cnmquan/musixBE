@@ -5,19 +5,16 @@ import com.example.musixBE.payloads.requests.authentication.LoginRequest;
 import com.example.musixBE.payloads.requests.authentication.RegisterRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.authentication.AuthenticationBody;
+import com.example.musixBE.payloads.responses.authentication.ConfirmationBody;
 import com.example.musixBE.services.user.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-
     private final AuthenticationService service;
 
     @PostMapping("/register")
@@ -45,5 +42,14 @@ public class AuthenticationController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @GetMapping("/confirm")
+    public String confirm(@RequestParam("token") String token) {
+        return service.confirm(token);
+    }
 
+    @PostMapping("/resend/{username}")
+    public ResponseEntity<Response<ConfirmationBody>> resend(@PathVariable("username") String username) {
+        var response = service.sendVerificationEmail(username);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }

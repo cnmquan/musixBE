@@ -1,6 +1,7 @@
 package com.example.musixBE.models.token;
 
 import com.example.musixBE.models.user.User;
+import com.mongodb.lang.Nullable;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -21,7 +22,7 @@ public class Token {
     @Indexed(unique = true)
     private String token;
 
-    private TokenType tokenType = TokenType.BEARER;
+    private TokenType tokenType;
 
     private boolean revoked;
 
@@ -30,7 +31,8 @@ public class Token {
     private long dateExpired;
 
     private long dateCreated;
-
+    @Nullable
+    private long confirmedAt;
     // User save username, email, id
     @Field("user")
     private User user;

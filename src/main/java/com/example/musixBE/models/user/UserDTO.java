@@ -16,6 +16,8 @@ public class UserDTO {
     private String username;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String email;
+
+    private boolean enabled;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ProfileDTO profile;
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -24,4 +26,5 @@ public class UserDTO {
     private List<UserDTO> followings;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<UserDTO> followers;
+
 }
