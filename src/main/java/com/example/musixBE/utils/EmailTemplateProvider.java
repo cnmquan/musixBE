@@ -1,7 +1,235 @@
 package com.example.musixBE.utils;
 
 public class EmailTemplateProvider {
-    public static String buildEmail(String name, String link) {
+    public static String buildErrorPage() {
+        return "\n" +
+                "<!doctype html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "<meta charset=\"utf-8\">\n" +
+                "<title>Ooops</title>\n" +
+                "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" />\n" +
+                "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css\" />\n" +
+                "\t<style type=\"text/css\">\n" +
+                "\n" +
+                "    body\n" +
+                "    {\n" +
+                "        background:#1E1C37;\n" +
+                "    }\n" +
+                "\n" +
+                "    .payment\n" +
+                "\t{\n" +
+                "\t\tborder:1px solid #f2f2f2;\n" +
+                "\t\theight:280px;\n" +
+                "        border-radius:20px;\n" +
+                "        background:#383676;\n" +
+                "\t}\n" +
+                "   .payment_header\n" +
+                "   {\n" +
+                "\t   background:#262345;\n" +
+                "\t   padding:20px;\n" +
+                "       border-radius:20px 20px 0px 0px;\n" +
+                "\t   \n" +
+                "   }\n" +
+                "   \n" +
+                "   .check\n" +
+                "   {\n" +
+                "\t   margin:0px auto;\n" +
+                "\t   width:50px;\n" +
+                "\t   height:50px;\n" +
+                "\t   border-radius:100%;\n" +
+                "\t   background:#FF0000;\n" +
+                "\t   text-align:center;\n" +
+                "   }\n" +
+                "   \n" +
+                "   .check i\n" +
+                "   {\n" +
+                "\t   vertical-align:middle;\n" +
+                "\t   line-height:50px;\n" +
+                "\t   font-size:30px;\n" +
+                "   }\n" +
+                "\n" +
+                "    .content \n" +
+                "    {\n" +
+                "        text-align:center;\n" +
+                "    }\n" +
+                "\n" +
+                "    .content  h1\n" +
+                "    {\n" +
+                "        font-size:25px;\n" +
+                "        padding-top:25px;\n" +
+                "    }\n" +
+                "\n" +
+                "    .content a\n" +
+                "    {\n" +
+                "        width:200px;\n" +
+                "        height:35px;\n" +
+                "        color:#fff;\n" +
+                "        border-radius:30px;\n" +
+                "        padding:5px 10px;\n" +
+                "        background:#262345;\n" +
+                "        transition:all ease-in-out 0.3s;\n" +
+                "    }\n" +
+                "    .white{\n" +
+                "        color:#fff;\n" +
+                "    }\n" +
+                "    .content a:hover\n" +
+                "    {\n" +
+                "        text-decoration:none;\n" +
+                "        background:#000;\n" +
+                "    }\n" +
+                "\t\t\n" +
+                "\t.video_ad\n" +
+                "\t\t{\n" +
+                "\t\t\tdisplay: inline-block;\n" +
+                "\t\t\twidth: 48%;\n" +
+                "\t\t\tmargin-top: 20px;\n" +
+                "\t\t\tmargin-left: 1%;\n" +
+                "\t\t}\n" +
+                "   \n" +
+                "\t</style>\n" +
+                "\t\n" +
+                "</head>\n" +
+                "\n" +
+                "<body>\n" +
+                "   <div class=\"container\">\n" +
+                "   <div class=\"row\">\n" +
+                "      <div class=\"col-md-6 mx-auto mt-5\">\n" +
+                "         <div class=\"payment\">\n" +
+                "            <div class=\"payment_header\">\n" +
+                "               <div class=\"check\"><i class=\"fa fa-close\" aria-hidden=\"true\"></i></div>\n" +
+                "            </div>\n" +
+                "            <div class=\"content\">\n" +
+                "               <h1 class = \"white\">Error</h1>\n" +
+                "               <p class = \"white\">The token is either expired or invalid\n" +
+                "               </p>\n" +
+                "            </div>\n" +
+                "            \n" +
+                "         </div>\n" +
+                "      </div>\n" +
+                "   </div>\n" +
+                "</div>\n" +
+                "   \n" +
+                "</body>\n" +
+                "</html>\n";
+    }
+
+    public static String buildSuccessPage() {
+        return "\n" +
+                "<!doctype html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "<meta charset=\"utf-8\">\n" +
+                "<title>Success</title>\n" +
+                "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" />\n" +
+                "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css\" />\n" +
+                "\t<style type=\"text/css\">\n" +
+                "\n" +
+                "    body\n" +
+                "    {\n" +
+                "        background:#1E1C37;\n" +
+                "    }\n" +
+                "\n" +
+                "    .payment\n" +
+                "\t{\n" +
+                "\t\tborder:1px solid #f2f2f2;\n" +
+                "\t\theight:280px;\n" +
+                "        border-radius:20px;\n" +
+                "        background:#383676;\n" +
+                "\t}\n" +
+                "   .payment_header\n" +
+                "   {\n" +
+                "\t   background:#262345;\n" +
+                "\t   padding:20px;\n" +
+                "       border-radius:20px 20px 0px 0px;\n" +
+                "\t   \n" +
+                "   }\n" +
+                "   \n" +
+                "   .check\n" +
+                "   {\n" +
+                "\t   margin:0px auto;\n" +
+                "\t   width:50px;\n" +
+                "\t   height:50px;\n" +
+                "\t   border-radius:100%;\n" +
+                "\t   background:#1FDF64;\n" +
+                "\t   text-align:center;\n" +
+                "   }\n" +
+                "   \n" +
+                "   .check i\n" +
+                "   {\n" +
+                "\t   vertical-align:middle;\n" +
+                "\t   line-height:50px;\n" +
+                "\t   font-size:30px;\n" +
+                "   }\n" +
+                "\n" +
+                "    .content \n" +
+                "    {\n" +
+                "        text-align:center;\n" +
+                "    }\n" +
+                "\n" +
+                "    .content  h1\n" +
+                "    {\n" +
+                "        font-size:25px;\n" +
+                "        padding-top:25px;\n" +
+                "    }\n" +
+                "\n" +
+                "    .content a\n" +
+                "    {\n" +
+                "        width:200px;\n" +
+                "        height:35px;\n" +
+                "        color:#fff;\n" +
+                "        border-radius:30px;\n" +
+                "        padding:5px 10px;\n" +
+                "        background:#262345;\n" +
+                "        transition:all ease-in-out 0.3s;\n" +
+                "    }\n" +
+                "    .white{\n" +
+                "        color:#fff;\n" +
+                "    }\n" +
+                "    .content a:hover\n" +
+                "    {\n" +
+                "        text-decoration:none;\n" +
+                "        background:#000;\n" +
+                "    }\n" +
+                "\t\t\n" +
+                "\t.video_ad\n" +
+                "\t\t{\n" +
+                "\t\t\tdisplay: inline-block;\n" +
+                "\t\t\twidth: 48%;\n" +
+                "\t\t\tmargin-top: 20px;\n" +
+                "\t\t\tmargin-left: 1%;\n" +
+                "\t\t}\n" +
+                "   \n" +
+                "\t</style>\n" +
+                "\t\n" +
+                "</head>\n" +
+                "\n" +
+                "<body>\n" +
+                "   <div class=\"container\">\n" +
+                "   <div class=\"row\">\n" +
+                "      <div class=\"col-md-6 mx-auto mt-5\">\n" +
+                "         <div class=\"payment\">\n" +
+                "            <div class=\"payment_header\">\n" +
+                "               <div class=\"check\"><i class=\"fa fa-check\" aria-hidden=\"true\"></i></div>\n" +
+                "            </div>\n" +
+                "            <div class=\"content\">\n" +
+                "               <h1 class = \"white\">Success</h1>\n" +
+                "               <p class = \"white\">Your Account has been successfully activated\n" +
+                "               </p>\n" +
+                "               <p class = \"white\">You may now close this window\n" +
+                "               </p>\n" +
+                "            </div>\n" +
+                "            \n" +
+                "         </div>\n" +
+                "      </div>\n" +
+                "   </div>\n" +
+                "</div>\n" +
+                "   \n" +
+                "</body>\n" +
+                "</html>\n";
+    }
+
+    public static String buildVerificationEmail(String name, String link) {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
                 "\n" +

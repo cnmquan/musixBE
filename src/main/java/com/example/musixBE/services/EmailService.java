@@ -22,14 +22,14 @@ public class EmailService implements EmailSender {
 
     @Override
     @Async
-    public void send(String to, User user, String link) {
+    public void send(User user, String link) {
         MimeMessage message = mailSender.createMimeMessage();
         try {
             message.setFrom(new InternetAddress("admin@musix.com"));
-            message.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress(to));
-            message.setSubject("Are you ready to rock?");
+            message.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress(user.getEmail()));
+            message.setSubject("Please confirm your email");
 
-            message.setContent(EmailTemplateProvider.buildEmail(user.getUsername(), link), "text/html; charset=utf-8");
+            message.setContent(EmailTemplateProvider.buildVerificationEmail(user.getUsername(), link), "text/html; charset=utf-8");
             mailSender.send(message);
         } catch (MessagingException e) {
             throw new RuntimeException(e);

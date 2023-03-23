@@ -17,6 +17,7 @@ import com.example.musixBE.repositories.UserRepository;
 import com.example.musixBE.services.EmailService;
 import com.example.musixBE.services.JwtService;
 import com.example.musixBE.services.MusixMapper;
+import com.example.musixBE.utils.EmailTemplateProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -44,30 +45,22 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final MusixMapper musixMapper = MusixMapper.INSTANCE;
 
-    public Response<ConfirmationBody> confirm(String confirmationToken) {
+    // This should return an HTML String
+    public String confirm(String confirmationToken) {
         boolean isConfirmationTokenExisted = tokenRepository.findByToken(confirmationToken).isPresent();
         if (!isConfirmationTokenExisted) {
-            return Response.<ConfirmationBody>builder()
-                    .status(StatusList.errorTokenNotFound.getStatus())
-                    .msg(StatusList.errorTokenNotFound.getMsg())
-                    .build();
+            return EmailTemplateProvider.buildErrorPage();
         }
         var token = tokenRepository.findByToken(confirmationToken).get();
         if (token.getDateExpired() < LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()) {
-            return Response.<ConfirmationBody>builder()
-                    .status(StatusList.errorTokenNotValid.getStatus())
-                    .msg(StatusList.errorTokenNotValid.getMsg())
-                    .build();
+            return  EmailTemplateProvider.buildErrorPage();
         }
         var user = userRepository.findByUsername(token.getUser().getUsername()).get();
         user.setEnabled(true);
         token.setConfirmedAt(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         tokenRepository.save(token);
         userRepository.save(user);
-        return Response.<ConfirmationBody>builder()
-                .status(StatusList.successService.getStatus())
-                .msg(StatusList.successService.getMsg())
-                .build();
+        return EmailTemplateProvider.buildSuccessPage();
     }
 
     public Response<AuthenticationBody> register(RegisterRequest request) {
@@ -104,14 +97,7 @@ public class AuthenticationService {
             // Create jwt token and save token to db
             var jwtToken = jwtService.generatedToken(user);
             var token = saveUserToken(userSaved, jwtToken);
-            // Create confirmation token and save token to db
-            String randomToken = UUID.randomUUID().toString();
-
-            var confirmationToken = saveConfirmationToken(userSaved, randomToken);
-            System.out.println("Confirmation token is" + confirmationToken);
-            String verificationLink = "http://localhost:8080/api/v1/auth/confirm?token=" + randomToken;
-            //Send verification email
-            emailService.send("thinhnguyendoan5122001@gmail.com", user, verificationLink);
+            sendVerificationEmail(userSaved.getUsername());
 
             // Response
             return Response.<AuthenticationBody>builder()
@@ -129,6 +115,27 @@ public class AuthenticationService {
                     .msg(StatusList.errorService.getMsg())
                     .build();
         }
+    }
+
+    public Response<ConfirmationBody> sendVerificationEmail(String username) {
+        // Create confirmation token and save token to db
+        String randomToken = UUID.randomUUID().toString();
+        boolean isUserExisted = userRepository.findByUsername(username).isPresent();
+        if (!isUserExisted) {
+            return Response.<ConfirmationBody>builder()
+                    .status(StatusList.errorUserIdNotFound.getStatus())
+                    .msg(StatusList.errorUserIdNotFound.getMsg())
+                    .build();
+        }
+        var user = userRepository.findByUsername(username).get();
+        saveConfirmationToken(user, randomToken);
+        String verificationLink = "http://localhost:8080/api/v1/auth/confirm?token=" + randomToken;
+        //Send verification email
+        emailService.send(user, verificationLink);
+        return Response.<ConfirmationBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
     }
 
     private Token saveConfirmationToken(User user, String confirmationToken) {

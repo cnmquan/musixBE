@@ -6,7 +6,6 @@ import com.example.musixBE.payloads.requests.authentication.RegisterRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.authentication.AuthenticationBody;
 import com.example.musixBE.payloads.responses.authentication.ConfirmationBody;
-import com.example.musixBE.services.EmailSender;
 import com.example.musixBE.services.user.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -44,8 +43,13 @@ public class AuthenticationController {
     }
 
     @GetMapping("/confirm")
-    public ResponseEntity<Response<ConfirmationBody>> confirm(@RequestParam("token") String token) {
-        var response = service.confirm(token);
+    public String confirm(@RequestParam("token") String token) {
+        return service.confirm(token);
+    }
+
+    @PostMapping("/resend/{username}")
+    public ResponseEntity<Response<ConfirmationBody>> resend(@PathVariable("username") String username) {
+        var response = service.sendVerificationEmail(username);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }
