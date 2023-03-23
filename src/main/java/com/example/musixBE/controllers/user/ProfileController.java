@@ -1,5 +1,6 @@
 package com.example.musixBE.controllers.user;
 
+import com.example.musixBE.payloads.requests.authentication.ChangePasswordRequest;
 import com.example.musixBE.payloads.requests.user.*;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.user.ListProfileBody;
@@ -45,6 +46,12 @@ public class ProfileController {
     @PostMapping("/follow")
     public ResponseEntity<Response<ProfileBody>> followUser(@RequestBody FollowUserRequest request) {
         var response = service.followUser(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PostMapping("/changePassword")
+    public ResponseEntity<Response> changePassword(@RequestBody ChangePasswordRequest request) {
+        var response = service.changePassword(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }
