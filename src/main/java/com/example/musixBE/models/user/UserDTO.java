@@ -17,6 +17,7 @@ public class UserDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String email;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private boolean enabled;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ProfileDTO profile;

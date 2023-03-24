@@ -2,10 +2,12 @@ package com.example.musixBE.services.music;
 
 import com.example.musixBE.models.music.*;
 import com.example.musixBE.models.status.StatusList;
+import com.example.musixBE.models.user.User;
 import com.example.musixBE.payloads.requests.music.*;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.music.UserMusicBody;
 import com.example.musixBE.repositories.MusicRepository;
+import com.example.musixBE.repositories.UserRepository;
 import com.example.musixBE.services.MusixMapper;
 import com.example.musixBE.utils.DateUtils;
 import com.example.musixBE.utils.FileUtils;
@@ -14,11 +16,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
 public class MusicService {
     private final MusicRepository musicRepository;
+
+    private final UserRepository userRepository;
 
     private final FileUtils fileUtils;
 
@@ -26,13 +31,41 @@ public class MusicService {
 
     public Response<UserMusicBody> getUserMusic(GetUserMusicRequest request) {
         try {
-            var music = musicRepository.findByUsername(request.getUsername())
-                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+             var user = userRepository.findByUsername(request.getUsername())
+                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+
+            var music = musicRepository.findByUsername(request.getUsername());
+            if(music.isEmpty()){
+                var newMusic = Music.builder()
+                        .user(User.builder()
+                                .id(user.getId())
+                                .username(user.getUsername())
+                                .email(user.getEmail())
+                                .profile(user.getProfile())
+                                .build())
+                        .dislikeArtists(new ArrayList<>())
+                        .dislikePlaylist(new ArrayList<>())
+                        .dislikeSongs(new ArrayList<>())
+                        .favoriteArtists(new ArrayList<>())
+                        .favoritePlaylists(new ArrayList<>())
+                        .favoriteSongs(new ArrayList<>())
+                        .ownPlaylists(new ArrayList<>())
+                        .build();
+                var saveMusic = musicRepository.save(newMusic);
+
+                return Response.<UserMusicBody>builder()
+                        .status(StatusList.successService.getStatus())
+                        .msg(StatusList.successService.getMsg())
+                        .data(UserMusicBody.builder()
+                                .music(mapper.musicToMusicDTO(saveMusic))
+                                .build())
+                        .build();
+            }
             return Response.<UserMusicBody>builder()
                     .status(StatusList.successService.getStatus())
                     .msg(StatusList.successService.getMsg())
                     .data(UserMusicBody.builder()
-                            .music(mapper.musicToMusicDTO(music))
+                            .music(mapper.musicToMusicDTO(music.get()))
                             .build())
                     .build();
         } catch (Exception e) {
@@ -64,22 +97,28 @@ public class MusicService {
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             var playlists = isFavorite ? music.getFavoritePlaylists() : music.getDislikePlaylist();
             var isExisted = false;
-            for(var playlistItem : playlists) {
-                if(playlistItem.getId().equals(playlist.getId())){
-                    playlists.remove(playlistItem);
-                    isExisted = true;
-                    break;
+
+            if(!playlists.isEmpty()) {
+                for(var playlistItem : playlists) {
+                    if(playlistItem.getId().equals(playlist.getId())){
+                        playlists.remove(playlistItem);
+                        isExisted = true;
+                        break;
+                    }
                 }
             }
+
             if(!isExisted) {
                 playlist.setType(PlaylistType.THIRD_PARTY);
                 playlists.add(mapper.toPlaylist(playlist));
             }
+
             if(isFavorite) {
                 music.setFavoritePlaylists(playlists);
             } else {
                 music.setDislikePlaylist(playlists);
             }
+
             var musicSaved = musicRepository.save(music);
             return Response.<UserMusicBody>builder()
                     .status(StatusList.successService.getStatus())
@@ -88,6 +127,7 @@ public class MusicService {
                             .music(mapper.musicToMusicDTO(musicSaved))
                             .build())
                     .build();
+
         } catch (Exception e) {
             if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
                 return Response.<UserMusicBody>builder()
@@ -117,21 +157,28 @@ public class MusicService {
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             var artists = isFavorite ? music.getFavoriteArtists() : music.getDislikeArtists();
             var isExisted = false;
-            for(var artistItem : artists) {
-                if(artistItem.getId().equals(artist.getId())){
-                    artists.remove(artistItem);
-                    isExisted = true;
-                    break;
+
+            if(!artists.isEmpty()){
+                for(var artistItem : artists) {
+                    if(artistItem.getId().equals(artist.getId())){
+                        artists.remove(artistItem);
+                        isExisted = true;
+                        break;
+                    }
                 }
             }
+
+
             if(!isExisted) {
                 artists.add(mapper.toArtist(artist));
             }
+
             if(isFavorite){
                 music.setFavoriteArtists(artists);
             } else {
                 music.setDislikeArtists(artists);
             }
+
             var musicSaved = musicRepository.save(music);
             return Response.<UserMusicBody>builder()
                     .status(StatusList.successService.getStatus())
@@ -140,6 +187,7 @@ public class MusicService {
                             .music(mapper.musicToMusicDTO(musicSaved))
                             .build())
                     .build();
+
         } catch (Exception e) {
             if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
                 return Response.<UserMusicBody>builder()
@@ -169,21 +217,27 @@ public class MusicService {
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             var songs = isFavorite ?  music.getFavoriteSongs() : music.getDislikeSongs();
             var isExisted = false;
-            for(var songItem : songs) {
-                if(songItem.getId().equals(song.getId())){
-                    songs.remove(songItem);
-                    isExisted = true;
-                    break;
+
+            if(!songs.isEmpty()){
+                for(var songItem : songs) {
+                    if(songItem.getId().equals(song.getId())){
+                        songs.remove(songItem);
+                        isExisted = true;
+                        break;
+                    }
                 }
             }
+
             if(!isExisted) {
                 songs.add(mapper.toSong(song));
             }
+
             if(isFavorite){
                 music.setFavoriteSongs(songs);
             } else {
                 music.setDislikeSongs(songs);
             }
+
             var musicSaved = musicRepository.save(music);
             return Response.<UserMusicBody>builder()
                     .status(StatusList.successService.getStatus())
@@ -192,6 +246,7 @@ public class MusicService {
                             .music(mapper.musicToMusicDTO(musicSaved))
                             .build())
                     .build();
+
         } catch (Exception e) {
             if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
                 return Response.<UserMusicBody>builder()
@@ -218,6 +273,7 @@ public class MusicService {
                     .sortDescription(request.getSortDescription())
                     .releasedAt(DateUtils.toCurrentDateString())
                     .type(PlaylistType.OWN)
+                    .songs(new ArrayList<>())
                     .build();
             var playlists = music.getOwnPlaylists();
             playlists.add(playlist);
@@ -426,16 +482,21 @@ public class MusicService {
                     var index = playlists.indexOf(playlistItem);
                     var songs = playlistItem.getSongs();
                     boolean isSongExisted = false;
-                    for(var songItem : songs){
-                        if(songItem.getId().equals(song.getId())){
-                            songs.remove(songItem);
-                            isSongExisted = true;
-                            break;
+
+                    if(!songs.isEmpty()){
+                        for(var songItem : songs){
+                            if(songItem.getId().equals(song.getId())){
+                                songs.remove(songItem);
+                                isSongExisted = true;
+                                break;
+                            }
                         }
                     }
+
                     if(!isSongExisted){
                         songs.add(song);
                     }
+
                     playlistItem.setSongs(songs);
                     playlists.set(index, playlistItem);
                     isExisted = true;

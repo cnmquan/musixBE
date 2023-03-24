@@ -1,6 +1,7 @@
 package com.example.musixBE.models.music;
 
 import com.example.musixBE.models.user.User;
+import com.example.musixBE.models.user.UserDTO;
 import lombok.*;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 @ToString
 public class MusicDTO {
     private String id;
-    private User user;
+    private UserDTO user;
     private List<ArtistDTO> favoriteArtists;
     private List<ArtistDTO> dislikeArtists;
     private List<SongDTO> favoriteSongs;
