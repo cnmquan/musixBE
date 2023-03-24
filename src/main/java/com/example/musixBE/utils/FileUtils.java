@@ -1,20 +1,19 @@
-package com.example.musixBE.services.file;
+package com.example.musixBE.utils;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class FileService {
-
+public class FileUtils {
     private final Cloudinary cloudinary;
 
-    public String upload(MultipartFile file, String url) throws IOException{
+    public String upload(MultipartFile file, String url) throws IOException {
         var r = this.cloudinary.uploader().upload(file.getBytes(),
                 ObjectUtils.asMap("public_id", url,
                         "overwrite ", true,
