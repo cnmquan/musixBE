@@ -3,9 +3,11 @@ package com.example.musixBE.controllers.user;
 import com.example.musixBE.payloads.requests.authentication.AuthenticationRequest;
 import com.example.musixBE.payloads.requests.authentication.LoginRequest;
 import com.example.musixBE.payloads.requests.authentication.RegisterRequest;
+import com.example.musixBE.payloads.requests.authentication.ResetPasswordRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.authentication.AuthenticationBody;
 import com.example.musixBE.payloads.responses.authentication.ConfirmationBody;
+import com.example.musixBE.payloads.responses.authentication.ResetPasswordBody;
 import com.example.musixBE.services.user.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +44,7 @@ public class AuthenticationController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    //This should return HTML page, so no it will return HTML code instead of ResponseEntity
     @GetMapping("/confirm")
     public String confirm(@RequestParam("token") String token) {
         return service.confirm(token);
@@ -50,6 +53,17 @@ public class AuthenticationController {
     @PostMapping("/resend/{username}")
     public ResponseEntity<Response<ConfirmationBody>> resend(@PathVariable("username") String username) {
         var response = service.sendVerificationEmail(username);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PostMapping("/reset/{email}")
+    public ResponseEntity<Response<ResetPasswordBody>> requestResetPassword(@PathVariable("email") String email) {
+        var response = service.requestResetPassword(email);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+    @PutMapping("/reset")
+    public  ResponseEntity<Response<ResetPasswordBody>>resetPassword(@RequestBody ResetPasswordRequest request){
+        var response = service.resetPassword(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

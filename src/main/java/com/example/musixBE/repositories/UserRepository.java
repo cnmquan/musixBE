@@ -9,13 +9,16 @@ import java.util.Optional;
 
 public interface UserRepository extends MongoRepository<User, String> {
     @Query("{username:  '?0'}")
-    Optional<User>findByUsername(String username);
+    Optional<User> findByUsername(String username);
 
     @Query("{$or: [{\"username\": '?0'},{\"email\": '?1'}]}")
-    Optional<User>findByUsernameOrEmail(String username, String email);
+    Optional<User> findByUsernameOrEmail(String username, String email);
 
     @Query("{$or: [{\"username\": '?0'}, {\"fullName\" :  '?1'}]}")
-    Optional<User>findByUsernameOrFullName(String username, String fullName);
+    Optional<User> findByUsernameOrFullName(String username, String fullName);
+
+    @Query("{email: '?0'}")
+    Optional<User> findByEmail(String email);
 
     @Query("{'profile.fullName': {$regex: RegExp('?0', 'i')}}")
     List<Optional<User>> findByFullName(String fullName);
