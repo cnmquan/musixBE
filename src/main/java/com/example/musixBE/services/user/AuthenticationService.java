@@ -2,22 +2,25 @@ package com.example.musixBE.services.user;
 
 import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.token.Token;
-import com.example.musixBE.models.token.TokenType;
 import com.example.musixBE.models.user.Profile;
 import com.example.musixBE.models.user.Role;
 import com.example.musixBE.models.user.User;
 import com.example.musixBE.payloads.requests.authentication.AuthenticationRequest;
 import com.example.musixBE.payloads.requests.authentication.LoginRequest;
 import com.example.musixBE.payloads.requests.authentication.RegisterRequest;
+import com.example.musixBE.payloads.requests.authentication.ResetPasswordRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.authentication.AuthenticationBody;
 import com.example.musixBE.payloads.responses.authentication.ConfirmationBody;
+import com.example.musixBE.payloads.responses.authentication.ResetPasswordBody;
 import com.example.musixBE.repositories.TokenRepository;
 import com.example.musixBE.repositories.UserRepository;
 import com.example.musixBE.services.EmailService;
 import com.example.musixBE.services.JwtService;
 import com.example.musixBE.services.MusixMapper;
 import com.example.musixBE.utils.EmailTemplateProvider;
+import com.example.musixBE.utils.RandomString;
+import com.example.musixBE.utils.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,14 +39,34 @@ import java.util.UUID;
 public class AuthenticationService {
     private final UserRepository userRepository;
 
+    private final TokenUtils tokenUtils;
     private final TokenRepository tokenRepository;
-
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
     private final MusixMapper musixMapper = MusixMapper.INSTANCE;
+
+    public Response<ResetPasswordBody> requestResetPassword(String email) {
+        // Create confirmation token and save token to db
+
+        String randomToken = RandomString.getAlphaNumericString(6);
+        boolean isUserExisted = userRepository.findByEmail(email).isPresent();
+        if (!isUserExisted) {
+            return Response.<ResetPasswordBody>builder()
+                    .status(StatusList.errorEmailNotFound.getStatus())
+                    .msg(StatusList.errorEmailNotFound.getMsg())
+                    .build();
+        }
+        var user = userRepository.findByEmail(email).get();
+        tokenUtils.saveResetPasswordToken(user, randomToken);
+        emailService.sendResetPasswordEmail(user, randomToken);
+        return Response.<ResetPasswordBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
+    }
 
     // This should return an HTML String
     public String confirm(String confirmationToken) {
@@ -53,7 +76,7 @@ public class AuthenticationService {
         }
         var token = tokenRepository.findByToken(confirmationToken).get();
         if (token.getDateExpired() < LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()) {
-            return  EmailTemplateProvider.buildErrorPage();
+            return EmailTemplateProvider.buildErrorPage();
         }
         var user = userRepository.findByUsername(token.getUser().getUsername()).get();
         user.setEnabled(true);
@@ -96,7 +119,7 @@ public class AuthenticationService {
 
             // Create jwt token and save token to db
             var jwtToken = jwtService.generatedToken(user);
-            var token = saveUserToken(userSaved, jwtToken);
+            var token = tokenUtils.saveUserToken(userSaved, jwtToken);
             sendVerificationEmail(userSaved.getUsername());
 
             // Response
@@ -128,49 +151,16 @@ public class AuthenticationService {
                     .build();
         }
         var user = userRepository.findByUsername(username).get();
-        saveConfirmationToken(user, randomToken);
+        tokenUtils.saveConfirmationToken(user, randomToken);
         String verificationLink = "http://localhost:8080/api/v1/auth/confirm?token=" + randomToken;
         //Send verification email
-        emailService.send(user, verificationLink);
+        emailService.sendVerificationLink(user, verificationLink);
         return Response.<ConfirmationBody>builder()
                 .status(StatusList.successService.getStatus())
                 .msg(StatusList.successService.getMsg())
                 .build();
     }
 
-    private Token saveConfirmationToken(User user, String confirmationToken) {
-        var token = Token.builder()
-                .user(User.builder()
-                        .id(user.getId())
-                        .username(user.getUsername())
-                        .email(user.getEmail())
-                        .build())
-                .token(confirmationToken)
-                .tokenType(TokenType.CONFIRMATION)
-                .isExpired(false)
-                .revoked(false)
-                .dateCreated(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-                .dateExpired(LocalDateTime.now().plusMinutes(10).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-                .build();
-        return tokenRepository.save(token);
-    }
-
-    private Token saveUserToken(User user, String jwtToken) {
-        var token = Token.builder()
-                .user(User.builder()
-                        .id(user.getId())
-                        .username(user.getUsername())
-                        .email(user.getEmail())
-                        .build())
-                .token(jwtToken)
-                .tokenType(TokenType.BEARER)
-                .isExpired(false)
-                .revoked(false)
-                .dateExpired(1000L * 30 * 24 * 60 * 60 + System.currentTimeMillis())
-                .dateCreated(System.currentTimeMillis())
-                .build();
-        return tokenRepository.save(token);
-    }
 
     public Response<AuthenticationBody> authentication(AuthenticationRequest request) {
         try {
@@ -251,7 +241,7 @@ public class AuthenticationService {
                         .build();
             } else {
                 var jwtToken = jwtService.generatedToken(user);
-                var tokenSaved = saveUserToken(user, jwtToken);
+                var tokenSaved = tokenUtils.saveUserToken(user, jwtToken);
                 return Response.<AuthenticationBody>builder()
                         .status(StatusList.successService.getStatus())
                         .msg(StatusList.successService.getMsg())
@@ -296,5 +286,43 @@ public class AuthenticationService {
             }
         }
         return null;
+    }
+
+    public Response<ResetPasswordBody> resetPassword(ResetPasswordRequest request) {
+        //check valid token
+        boolean isExistedToken = tokenRepository.findByToken(request.getToken()).isPresent();
+        if (!isExistedToken) {
+            return Response.<ResetPasswordBody>builder()
+                    .status(StatusList.errorTokenNotFound.getStatus())
+                    .msg(StatusList.errorTokenNotFound.getMsg())
+                    .build();
+        }
+        Token token = tokenRepository.findByToken(request.getToken()).get();
+        if (token.getDateExpired() < LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()) {
+            return Response.<ResetPasswordBody>builder()
+                    .status(StatusList.errorTokenNotValid.getStatus())
+                    .msg(StatusList.errorTokenNotValid.getMsg())
+                    .build();
+        }
+        if (!request.getEmail().equals(token.getUser().getEmail())) {
+            return Response.<ResetPasswordBody>builder()
+                    .status(StatusList.errorTokenDoesNotMatch.getStatus())
+                    .msg(StatusList.errorTokenDoesNotMatch.getMsg())
+                    .build();
+        }
+        boolean isUserExisted = userRepository.findByEmail(request.getEmail()).isPresent();
+        if (!isUserExisted) {
+            return Response.<ResetPasswordBody>builder()
+                    .status(StatusList.errorEmailNotFound.getStatus())
+                    .msg(StatusList.errorEmailNotFound.getMsg())
+                    .build();
+        }
+        var user = userRepository.findByEmail(request.getEmail()).get();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        return Response.<ResetPasswordBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
     }
 }

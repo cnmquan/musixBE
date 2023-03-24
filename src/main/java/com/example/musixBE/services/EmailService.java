@@ -22,7 +22,7 @@ public class EmailService implements EmailSender {
 
     @Override
     @Async
-    public void send(User user, String link) {
+    public void sendVerificationLink(User user, String link) {
         MimeMessage message = mailSender.createMimeMessage();
         try {
             message.setFrom(new InternetAddress("admin@musix.com"));
@@ -34,6 +34,21 @@ public class EmailService implements EmailSender {
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
-        mailSender.send(message);
+    }
+
+    @Override
+    public void sendResetPasswordEmail(User user, String token) {
+        MimeMessage message = mailSender.createMimeMessage();
+
+        try {
+            message.setFrom(new InternetAddress("admin@musix.com"));
+            message.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress(user.getEmail()));
+            message.setSubject("Reset your password");
+            message.setContent(EmailTemplateProvider.buildResetPasswordPage(user.getUsername(), token), "text/html; charset=utf-8");
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
