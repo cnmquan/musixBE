@@ -259,7 +259,7 @@ public class AuthenticationService {
         } catch (AuthenticationException exception) {
             return Response.<AuthenticationBody>builder()
                     .status(StatusList.errorPasswordNotCorrect.getStatus())
-                    .msg(StatusList.errorPasswordNotCorrect.getMsg())
+                    .msg(exception.getMessage())
                     .build();
         } catch (Exception e) {
             return Response.<AuthenticationBody>builder()
