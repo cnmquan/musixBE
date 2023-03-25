@@ -13,6 +13,9 @@ public interface TokenRepository extends MongoRepository<Token, String> {
     @Query("{\"user.username\": '?0'}")
     List<Token> findAllValidTokenByUser(String username);
 
+    @Query("{\"user.username\": '?0', tokenType: '?1'}")
+    List<Token> findAllValidTokenByUserAndTokenType(String username, String tokenType);
+
     @Query("{token:  '?0'}")
     Optional<Token> findByToken(String token);
 }

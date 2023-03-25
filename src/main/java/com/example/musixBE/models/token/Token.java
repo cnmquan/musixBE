@@ -31,8 +31,6 @@ public class Token {
     private long dateExpired;
 
     private long dateCreated;
-    @Nullable
-    private long confirmedAt;
     // User save username, email, id
     @Field("user")
     private User user;
