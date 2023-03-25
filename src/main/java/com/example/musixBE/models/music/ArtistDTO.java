@@ -1,31 +1,26 @@
-package com.example.musixBE.models.user;
+package com.example.musixBE.models.music;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class UserDTO {
+public class ArtistDTO {
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String id;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String username;
+    private String name;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String email;
-
+    private String alias;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private boolean enabled;
+    private String thumbnail;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private ProfileDTO profile;
+    private String cover;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Role role;
+    private String biography;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private List<UserDTO> followings;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private List<UserDTO> followers;
-
+    private String sortBiography;
 }

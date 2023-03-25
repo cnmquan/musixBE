@@ -11,4 +11,6 @@ public class StatusList {
     public static final StatusData errorUserIdNotFound = new StatusData(457, "User Id Not Found");
     public static final StatusData errorEmailNotFound = new StatusData(458, "No User Found For This Email Address");
     public static final StatusData errorTokenDoesNotMatch = new StatusData(459, "Token does not match with the email");
+    public static final StatusData errorPlaylistNotFound = new StatusData(460, "Playlist Not Found");
+    public static final StatusData errorPlaylistExisted = new StatusData(461, "Playlist Existed");
 }

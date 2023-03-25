@@ -13,7 +13,7 @@ import com.example.musixBE.payloads.responses.user.ListProfileBody;
 import com.example.musixBE.payloads.responses.user.ProfileBody;
 import com.example.musixBE.repositories.UserRepository;
 import com.example.musixBE.services.MusixMapper;
-import com.example.musixBE.services.file.FileService;
+import com.example.musixBE.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,7 +35,7 @@ public class ProfileService {
 
     private final MusixMapper musixMapper = MusixMapper.INSTANCE;
 
-    private final FileService fileService;
+    private final FileUtils fileUtils;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -59,7 +59,7 @@ public class ProfileService {
             } else {
                 return Response.<ProfileBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
@@ -96,7 +96,7 @@ public class ProfileService {
             } else {
                 return Response.<ProfileBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
@@ -111,7 +111,7 @@ public class ProfileService {
                 avatarId = user.getId()+"/profile/avatar";
                 user.getProfile().setAvatarId(avatarId);
             }
-            var uploadUrl = fileService.upload(request.getAvatar(), avatarId);
+            var uploadUrl = fileUtils.upload(request.getAvatar(), avatarId);
             user.getProfile().setAvatarUri(uploadUrl);
             var userSaved = userRepository.save(user);
             return  Response.<ProfileBody>builder()
@@ -137,7 +137,7 @@ public class ProfileService {
             } else {
                 return Response.<ProfileBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
@@ -163,7 +163,7 @@ public class ProfileService {
             } else {
                 return Response.<ListProfileBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
@@ -238,7 +238,7 @@ public class ProfileService {
             } else {
                 return Response.<ProfileBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
@@ -275,7 +275,7 @@ public class ProfileService {
             else {
                 return Response.builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
