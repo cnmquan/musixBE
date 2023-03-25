@@ -61,8 +61,9 @@ public class AuthenticationController {
         var response = service.requestResetPassword(email);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
-    @PutMapping("/reset")
-    public  ResponseEntity<Response<ResetPasswordBody>>resetPassword(@RequestBody ResetPasswordRequest request){
+
+    @PatchMapping("/reset")
+    public ResponseEntity<Response<ResetPasswordBody>> resetPassword(@RequestBody ResetPasswordRequest request) {
         var response = service.resetPassword(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }

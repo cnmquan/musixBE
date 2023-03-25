@@ -15,6 +15,5 @@ public class TokenDTO {
     private boolean isExpired;
     private long dateExpired;
     private long dateCreated;
-    private long confirmedAt;
     private UserDTO user;
 }

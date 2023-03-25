@@ -2,6 +2,7 @@ package com.example.musixBE.services.user;
 
 import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.token.Token;
+import com.example.musixBE.models.token.TokenType;
 import com.example.musixBE.models.user.Profile;
 import com.example.musixBE.models.user.Role;
 import com.example.musixBE.models.user.User;
@@ -51,7 +52,7 @@ public class AuthenticationService {
     public Response<ResetPasswordBody> requestResetPassword(String email) {
         // Create confirmation token and save token to db
 
-        String randomToken = RandomString.getAlphaNumericString(6);
+        String randomToken;
         boolean isUserExisted = userRepository.findByEmail(email).isPresent();
         if (!isUserExisted) {
             return Response.<ResetPasswordBody>builder()
@@ -60,7 +61,14 @@ public class AuthenticationService {
                     .build();
         }
         var user = userRepository.findByEmail(email).get();
-        tokenUtils.saveResetPasswordToken(user, randomToken);
+        Token token = getValidTokenByUserAndType(user, TokenType.RESET_PASSWORD);
+        if (token == null) {
+            randomToken = RandomString.getAlphaNumericString(6);
+            tokenUtils.saveResetPasswordToken(user, randomToken);
+        }
+        else{
+            randomToken = token.getToken();
+        }
         emailService.sendResetPasswordEmail(user, randomToken);
         return Response.<ResetPasswordBody>builder()
                 .status(StatusList.successService.getStatus())
@@ -80,7 +88,6 @@ public class AuthenticationService {
         }
         var user = userRepository.findByUsername(token.getUser().getUsername()).get();
         user.setEnabled(true);
-        token.setConfirmedAt(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         tokenRepository.save(token);
         userRepository.save(user);
         return EmailTemplateProvider.buildSuccessPage();
@@ -142,7 +149,6 @@ public class AuthenticationService {
 
     public Response<ConfirmationBody> sendVerificationEmail(String username) {
         // Create confirmation token and save token to db
-        String randomToken = UUID.randomUUID().toString();
         boolean isUserExisted = userRepository.findByUsername(username).isPresent();
         if (!isUserExisted) {
             return Response.<ConfirmationBody>builder()
@@ -151,7 +157,14 @@ public class AuthenticationService {
                     .build();
         }
         var user = userRepository.findByUsername(username).get();
-        tokenUtils.saveConfirmationToken(user, randomToken);
+        String randomToken;
+        Token token = getValidTokenByUserAndType(user, TokenType.CONFIRMATION);
+        if (token == null) {
+            randomToken = UUID.randomUUID().toString();
+            tokenUtils.saveConfirmationToken(user, randomToken);
+        } else {
+            randomToken = token.getToken();
+        }
         String verificationLink = "http://localhost:8080/api/v1/auth/confirm?token=" + randomToken;
         //Send verification email
         emailService.sendVerificationLink(user, verificationLink);
@@ -268,6 +281,27 @@ public class AuthenticationService {
                     .build();
         }
 
+    }
+
+    private Token getValidTokenByUserAndType(User user, TokenType tokenType) {
+        long currentTimeInMillis = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        var validUserTokens = tokenRepository.findAllValidTokenByUserAndTokenType(user.getUsername(), tokenType.name());
+        if (validUserTokens == null) return null;
+        if (validUserTokens.isEmpty()) return null;
+        validUserTokens.sort((a, b) -> Math.toIntExact(b.getDateCreated() - a.getDateCreated()));
+        for (Token validUserToken : validUserTokens) {
+            if (validUserToken.getDateExpired() < currentTimeInMillis) {
+                validUserToken.setExpired(true);
+                validUserToken.setRevoked(true);
+                tokenRepository.save(validUserToken);
+                continue;
+            }
+            if (!validUserToken.isExpired() && !validUserToken.isRevoked()) {
+                return validUserToken;
+            }
+
+        }
+        return null;
     }
 
     private Token getValidToken(User user) {
