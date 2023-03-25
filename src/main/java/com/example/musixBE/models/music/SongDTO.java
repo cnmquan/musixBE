@@ -22,6 +22,8 @@ public class SongDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<GenreDTO> genres;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String genreNames;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<ArtistDTO> artists;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String audioUrl;

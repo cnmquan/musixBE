@@ -28,7 +28,7 @@ public class ProfileController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PostMapping("/info")
+    @PutMapping("/info")
     public ResponseEntity<Response<ProfileBody>> uploadInfo(
             @RequestBody UploadProfileRequest request
     ) {
@@ -37,13 +37,13 @@ public class ProfileController {
 
     }
 
-    @PostMapping("/avatar")
+    @PutMapping("/avatar")
     public ResponseEntity<Response<ProfileBody>> uploadProfile(@ModelAttribute UploadAvatarRequest request) {
         var response = service.uploadAvatar(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PostMapping("/follow")
+    @PutMapping("/follow")
     public ResponseEntity<Response<ProfileBody>> followUser(@RequestBody FollowUserRequest request) {
         var response = service.followUser(request);
         return ResponseEntity.status(response.getStatus()).body(response);

@@ -20,4 +20,10 @@ public class FileUtils {
                         "resource_type", "auto"));
         return r.get("secure_url").toString();
     }
+
+    public void destroy(String url, FileType type) throws IOException {
+        this.cloudinary.uploader().destroy(url, ObjectUtils.asMap("public_id", url,
+                "overwrite ", true,
+                "resource_type", type.name()));
+    }
 }

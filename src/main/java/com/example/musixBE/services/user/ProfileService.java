@@ -59,7 +59,7 @@ public class ProfileService {
             } else {
                 return Response.<ProfileBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
@@ -96,7 +96,7 @@ public class ProfileService {
             } else {
                 return Response.<ProfileBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
@@ -137,7 +137,7 @@ public class ProfileService {
             } else {
                 return Response.<ProfileBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
@@ -163,7 +163,7 @@ public class ProfileService {
             } else {
                 return Response.<ListProfileBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
@@ -238,7 +238,7 @@ public class ProfileService {
             } else {
                 return Response.<ProfileBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
@@ -275,7 +275,7 @@ public class ProfileService {
             else {
                 return Response.builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }

@@ -10,6 +10,8 @@ import com.example.musixBE.models.user.UserDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper
 public interface MusixMapper {
 
@@ -23,6 +25,8 @@ public interface MusixMapper {
 
     ArtistDTO artistToArtistDTO(Artist artist);
 
+    List<ArtistDTO> artistListToArtistDTOList(List<Artist> artists);
+
     Artist toArtist(ArtistDTO artistDTO);
 
     GenreDTO genreToGenreDTO(Genre genre);
@@ -31,9 +35,13 @@ public interface MusixMapper {
 
     SongDTO songToSongDTO(Song song);
 
+    List<SongDTO> songListToSongDTOList(List<Song> songs);
+
     Song toSong(SongDTO songDTO);
 
     PlaylistDTO playlistToPlaylistDTO(Playlist playlist);
+
+    List<PlaylistDTO> playlistListToPlaylistDTOList(List<Playlist> playlists);
 
     Playlist toPlaylist(PlaylistDTO playlistDTO);
 

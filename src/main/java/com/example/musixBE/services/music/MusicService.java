@@ -5,11 +5,15 @@ import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.user.User;
 import com.example.musixBE.payloads.requests.music.*;
 import com.example.musixBE.payloads.responses.Response;
+import com.example.musixBE.payloads.responses.music.ListArtistBody;
+import com.example.musixBE.payloads.responses.music.ListPlaylistBody;
+import com.example.musixBE.payloads.responses.music.ListSongBody;
 import com.example.musixBE.payloads.responses.music.UserMusicBody;
 import com.example.musixBE.repositories.MusicRepository;
 import com.example.musixBE.repositories.UserRepository;
 import com.example.musixBE.services.MusixMapper;
 import com.example.musixBE.utils.DateUtils;
+import com.example.musixBE.utils.FileType;
 import com.example.musixBE.utils.FileUtils;
 import com.example.musixBE.utils.RandomString;
 import lombok.RequiredArgsConstructor;
@@ -77,21 +81,21 @@ public class MusicService {
             } else {
                 return Response.<UserMusicBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
     }
 
-    public  Response<UserMusicBody> favoritePlaylist(FavoritePlaylistRequest request) {
+    public  Response<ListPlaylistBody> favoritePlaylist(FavoritePlaylistRequest request) {
         return playlistService(request.getPlaylist(), request.getUsername(), true);
     }
 
-    public  Response<UserMusicBody> dislikePlaylist(DislikePlaylistRequest request) {
+    public  Response<ListPlaylistBody> dislikePlaylist(DislikePlaylistRequest request) {
         return playlistService(request.getPlaylist(), request.getUsername(), false);
     }
 
-    private Response<UserMusicBody> playlistService(PlaylistDTO playlist, String username, boolean isFavorite) {
+    private Response<ListPlaylistBody> playlistService(PlaylistDTO playlist, String username, boolean isFavorite) {
         try {
             var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
@@ -119,39 +123,39 @@ public class MusicService {
                 music.setDislikePlaylist(playlists);
             }
 
-            var musicSaved = musicRepository.save(music);
-            return Response.<UserMusicBody>builder()
+            musicRepository.save(music);
+            return Response.<ListPlaylistBody>builder()
                     .status(StatusList.successService.getStatus())
                     .msg(StatusList.successService.getMsg())
-                    .data(UserMusicBody.builder()
-                            .music(mapper.musicToMusicDTO(musicSaved))
+                    .data(ListPlaylistBody.builder()
+                            .playlists(mapper.playlistListToPlaylistDTOList(playlists))
                             .build())
                     .build();
 
         } catch (Exception e) {
             if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorUsernameNotFound.getStatus())
                         .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
             } else {
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
     }
 
-    public  Response<UserMusicBody> favoriteArtist(FavoriteArtistRequest request) {
+    public  Response<ListArtistBody> favoriteArtist(FavoriteArtistRequest request) {
         return artistService(request.getArtist(), request.getUsername(), true);
     }
 
-    public  Response<UserMusicBody> dislikeArtist(DislikeArtistRequest request) {
+    public  Response<ListArtistBody> dislikeArtist(DislikeArtistRequest request) {
         return artistService(request.getArtist(), request.getUsername(), false);
     }
 
-    private Response<UserMusicBody> artistService(ArtistDTO artist, String username, boolean isFavorite) {
+    private Response<ListArtistBody> artistService(ArtistDTO artist, String username, boolean isFavorite) {
         try {
             var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
@@ -179,39 +183,39 @@ public class MusicService {
                 music.setDislikeArtists(artists);
             }
 
-            var musicSaved = musicRepository.save(music);
-            return Response.<UserMusicBody>builder()
+            musicRepository.save(music);
+            return Response.<ListArtistBody>builder()
                     .status(StatusList.successService.getStatus())
                     .msg(StatusList.successService.getMsg())
-                    .data(UserMusicBody.builder()
-                            .music(mapper.musicToMusicDTO(musicSaved))
+                    .data(ListArtistBody.builder()
+                            .artists(mapper.artistListToArtistDTOList(artists))
                             .build())
                     .build();
 
         } catch (Exception e) {
             if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
-                return Response.<UserMusicBody>builder()
+                return Response.<ListArtistBody>builder()
                         .status(StatusList.errorUsernameNotFound.getStatus())
                         .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
             } else {
-                return Response.<UserMusicBody>builder()
+                return Response.<ListArtistBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
     }
 
-    public  Response<UserMusicBody> favoriteSong(FavoriteSongRequest request) {
+    public  Response<ListSongBody> favoriteSong(FavoriteSongRequest request) {
         return songService(request.getSong(), request.getUsername(), true);
     }
 
-    public  Response<UserMusicBody> dislikeSong(DislikeSongRequest request) {
+    public  Response<ListSongBody> dislikeSong(DislikeSongRequest request) {
         return songService(request.getSong(), request.getUsername(), false);
     }
 
-    private Response<UserMusicBody> songService(SongDTO song, String username, boolean isFavorite) {
+    private Response<ListSongBody> songService(SongDTO song, String username, boolean isFavorite) {
         try {
             var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
@@ -238,34 +242,41 @@ public class MusicService {
                 music.setDislikeSongs(songs);
             }
 
-            var musicSaved = musicRepository.save(music);
-            return Response.<UserMusicBody>builder()
+            musicRepository.save(music);
+            return Response.<ListSongBody>builder()
                     .status(StatusList.successService.getStatus())
                     .msg(StatusList.successService.getMsg())
-                    .data(UserMusicBody.builder()
-                            .music(mapper.musicToMusicDTO(musicSaved))
+                    .data(ListSongBody.builder()
+                            .songs(mapper.songListToSongDTOList(songs))
                             .build())
                     .build();
 
         } catch (Exception e) {
             if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
-                return Response.<UserMusicBody>builder()
+                return Response.<ListSongBody>builder()
                         .status(StatusList.errorUsernameNotFound.getStatus())
                         .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
             } else {
-                return Response.<UserMusicBody>builder()
+                return Response.<ListSongBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
     }
 
-    public Response<UserMusicBody> createPlaylist(CreatePlaylistRequest request) {
+    public Response<ListPlaylistBody> createPlaylist(CreatePlaylistRequest request) {
         try {
             var music = musicRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+
+            var playlists = music.getOwnPlaylists();
+            for(var playlistItem : playlists){
+                if(playlistItem.getTitle().equals(request.getTitle())){
+                    throw new Exception(StatusList.errorPlaylistExisted.getMsg());
+                }
+            }
 
             var playlist = Playlist.builder()
                     .id(RandomString.getAlphaNumericString(24))
@@ -274,35 +285,42 @@ public class MusicService {
                     .releasedAt(DateUtils.toCurrentDateString())
                     .type(PlaylistType.OWN)
                     .songs(new ArrayList<>())
+                    .countSongs(0)
                     .build();
-            var playlists = music.getOwnPlaylists();
+
             playlists.add(playlist);
             music.setOwnPlaylists(playlists);
             musicRepository.save(music);
 
-            return Response.<UserMusicBody>builder()
+            return Response.<ListPlaylistBody>builder()
                     .status(StatusList.successService.getStatus())
                     .msg(StatusList.successService.getMsg())
-                    .data(UserMusicBody.builder()
-                            .music(mapper.musicToMusicDTO(music))
+                    .data(ListPlaylistBody.builder()
+                            .playlists(mapper.playlistListToPlaylistDTOList(playlists))
                             .build())
                     .build();
         } catch (Exception e) {
             if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorUsernameNotFound.getStatus())
                         .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
-            } else {
-                return Response.<UserMusicBody>builder()
+            } else if(e.getMessage().equals(StatusList.errorPlaylistExisted.getMsg())){
+                return Response.<ListPlaylistBody>builder()
+                        .status(StatusList.errorPlaylistExisted.getStatus())
+                        .msg(StatusList.errorPlaylistExisted.getMsg())
+                        .build();
+            }
+            else {
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
     }
 
-    public Response<UserMusicBody> changeProfilePlaylist(ChangeProfilePlaylistRequest request) {
+    public Response<ListPlaylistBody> changeProfilePlaylist(ChangeProfilePlaylistRequest request) {
         try {
             var music = musicRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
@@ -335,36 +353,36 @@ public class MusicService {
             }
 
 
-            return Response.<UserMusicBody>builder()
+            return Response.<ListPlaylistBody>builder()
                     .status(StatusList.successService.getStatus())
                     .msg(StatusList.successService.getMsg())
-                    .data(UserMusicBody.builder()
-                            .music(mapper.musicToMusicDTO(music))
+                    .data(ListPlaylistBody.builder()
+                            .playlists(mapper.playlistListToPlaylistDTOList(playlists))
                             .build())
                     .build();
         } catch (Exception e) {
             if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorUsernameNotFound.getStatus())
                         .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
             } else if(e.getMessage().equals(StatusList.errorPlaylistNotFound.getMsg())){
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorPlaylistNotFound.getStatus())
                         .msg(StatusList.errorPlaylistNotFound.getMsg())
                         .build();
             } else {
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
     }
 
-    public Response<UserMusicBody> uploadPlaylistThumbnail(UploadPlaylistThumbnailRequest request){
+    public Response<ListPlaylistBody> uploadPlaylistThumbnail(UploadPlaylistThumbnailRequest request){
         try {
-            var music = musicRepository.findById(request.getUsername())
+            var music = musicRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             var playlists = music.getOwnPlaylists();
             Playlist playlist = null;
@@ -390,38 +408,38 @@ public class MusicService {
 
             playlists.set(index, playlist);
             music.setOwnPlaylists(playlists);
-            var musicSaved = musicRepository.save(music);
+            musicRepository.save(music);
 
-            return  Response.<UserMusicBody>builder()
+            return Response.<ListPlaylistBody>builder()
                     .status(StatusList.successService.getStatus())
                     .msg(StatusList.successService.getMsg())
-                    .data(UserMusicBody.builder()
-                            .music(mapper.musicToMusicDTO(musicSaved))
+                    .data(ListPlaylistBody.builder()
+                            .playlists(mapper.playlistListToPlaylistDTOList(playlists))
                             .build())
                     .build();
         }
         catch (IOException e){
-            return Response.<UserMusicBody>builder()
+            return Response.<ListPlaylistBody>builder()
                     .status(400)
                     .msg(e.getMessage())
                     .build();
         }
         catch (Exception e) {
             if (e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorUsernameNotFound.getStatus())
                         .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
             } else {
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
     }
 
-    public Response<UserMusicBody> removePlaylist(RemovePlaylistRequest request){
+    public Response<ListPlaylistBody> removePlaylist(RemovePlaylistRequest request){
         try {
             var music = musicRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
@@ -431,6 +449,9 @@ public class MusicService {
             for(var playlistItem : playlists){
                 if(playlistItem.getId().equals(request.getPlaylistId())){
                     isExisted = true;
+                    if(playlistItem.getThumbnailId() != null){
+                        fileUtils.destroy(playlistItem.getThumbnailId(), FileType.image);
+                    }
                     playlists.remove(playlistItem);
                     break;
                 }
@@ -442,34 +463,41 @@ public class MusicService {
                 musicRepository.save(music);
             }
 
-            return Response.<UserMusicBody>builder()
+            return Response.<ListPlaylistBody>builder()
                     .status(StatusList.successService.getStatus())
                     .msg(StatusList.successService.getMsg())
-                    .data(UserMusicBody.builder()
-                            .music(mapper.musicToMusicDTO(music))
+                    .data(ListPlaylistBody.builder()
+                            .playlists(mapper.playlistListToPlaylistDTOList(playlists))
                             .build())
                     .build();
-        } catch (Exception e) {
+        }
+        catch (IOException e){
+            return Response.<ListPlaylistBody>builder()
+                    .status(400)
+                    .msg(e.getMessage())
+                    .build();
+        }
+        catch (Exception e) {
             if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorUsernameNotFound.getStatus())
                         .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
             } else if  (e.getMessage().equals(StatusList.errorPlaylistNotFound.getMsg())) {
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorPlaylistNotFound.getStatus())
                         .msg(StatusList.errorPlaylistNotFound.getMsg())
                         .build();
             }else {
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }
     }
 
-    public Response<UserMusicBody> uploadSongPlaylist(UploadSongPlaylistRequest request) {
+    public Response<ListPlaylistBody> uploadSongPlaylist(UploadSongPlaylistRequest request) {
         try {
             var music = musicRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
@@ -498,6 +526,7 @@ public class MusicService {
                     }
 
                     playlistItem.setSongs(songs);
+                    playlistItem.setCountSongs(songs.size());
                     playlists.set(index, playlistItem);
                     isExisted = true;
                     break;
@@ -510,29 +539,29 @@ public class MusicService {
             }
 
 
-            return Response.<UserMusicBody>builder()
+            return Response.<ListPlaylistBody>builder()
                     .status(StatusList.successService.getStatus())
                     .msg(StatusList.successService.getMsg())
-                    .data(UserMusicBody.builder()
-                            .music(mapper.musicToMusicDTO(music))
+                    .data(ListPlaylistBody.builder()
+                            .playlists(mapper.playlistListToPlaylistDTOList(playlists))
                             .build())
                     .build();
         } catch (Exception e) {
             if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorUsernameNotFound.getStatus())
                         .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
             }
             else if(e.getMessage().equals(StatusList.errorPlaylistNotFound.getMsg())){
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorPlaylistNotFound.getStatus())
                         .msg(StatusList.errorPlaylistNotFound.getMsg())
                         .build();
             } else {
-                return Response.<UserMusicBody>builder()
+                return Response.<ListPlaylistBody>builder()
                         .status(StatusList.errorService.getStatus())
-                        .msg(StatusList.errorService.getMsg())
+                        .msg(e.getMessage())
                         .build();
             }
         }

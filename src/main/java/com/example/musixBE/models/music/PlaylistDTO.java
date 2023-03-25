@@ -26,6 +26,10 @@ public class PlaylistDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<SongDTO> songs;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private int countSongs;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String genreNames;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<GenreDTO> genres;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<ArtistDTO> artists;

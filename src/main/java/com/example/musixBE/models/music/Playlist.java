@@ -17,9 +17,11 @@ public class Playlist {
     private String thumbnail;
     private String thumbnailId;
     private String artistNames;
+    private String genreNames;
     private String releasedAt;
     private String sortDescription;
     private List<Song> songs;
+    private int countSongs;
     private List<Genre> genres;
     private List<Artist> artists;
     private PlaylistType type;

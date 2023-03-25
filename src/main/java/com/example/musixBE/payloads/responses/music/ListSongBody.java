@@ -1,5 +1,6 @@
-package com.example.musixBE.models.music;
+package com.example.musixBE.payloads.responses.music;
 
+import com.example.musixBE.models.music.SongDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +12,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Genre {
-    private String id;
-    private String tile;
-    private String alias;
+public class ListSongBody {
+    private List<SongDTO> songs;
 }
