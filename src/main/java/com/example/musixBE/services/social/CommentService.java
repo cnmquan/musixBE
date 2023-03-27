@@ -61,7 +61,6 @@ public class CommentService {
                 .content(request.getContent())
                 // is author should be set as true in the reply API
                 .isAuthor(false)
-                .isDeleted(false)
                 .build();
         commentRepository.save(comment);
         return Response.<CommentBody>builder()
@@ -131,4 +130,90 @@ public class CommentService {
                 .msg(StatusList.successService.getMsg())
                 .build();
     }
+
+    public Response<CommentBody> reply(String commentId, CreateCommentRequest request, String bearerToken) {
+        var comment = commentRepository.findById(commentId);
+
+        String username = jwtService.extractUsername(bearerToken.substring(7));
+        if (comment.isEmpty()) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorCommentNotFound.getStatus())
+                    .msg(StatusList.errorCommentNotFound.getMsg())
+                    .build();
+        }
+        var user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorUsernameNotFound.getStatus())
+                    .msg(StatusList.errorUsernameNotFound.getMsg())
+                    .build();
+        }
+        Comment reply = Comment.builder()
+                .ownerId(user.get().getId())
+                .ownerUsername(username)
+                .replies(new ArrayList<>())
+                .likedBy(new ArrayList<>())
+                .dateCreated(System.currentTimeMillis())
+                .lastModified(System.currentTimeMillis())
+                .content(request.getContent())
+                .isAuthor(comment.get().getOwnerUsername().equals(username))
+                .build();
+        var savedReply = commentRepository.save(reply);
+        var listReply = comment.get().getReplies();
+        listReply.add(savedReply.getId());
+        comment.get().setReplies(listReply);
+        commentRepository.save(comment.get());
+        return Response.<CommentBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
+    }
+
+    public Response<CommentBody> delete(String commentId, String bearerToken) {
+        String username = jwtService.extractUsername(bearerToken.substring(7));
+
+        if (username.isEmpty()) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorUsernameNotFound.getStatus())
+                    .msg(StatusList.errorUsernameNotFound.getMsg())
+                    .build();
+        }
+        var comment = commentRepository.findById(commentId);
+        if (comment.isEmpty()) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorCommentNotFound.getStatus())
+                    .msg(StatusList.errorCommentNotFound.getMsg())
+                    .build();
+        }
+        if (!comment.get().getOwnerUsername().equals(username)) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorUsernameDoesNotMatch.getStatus())
+                    .msg(StatusList.errorUsernameDoesNotMatch.getMsg())
+                    .build();
+        }
+        deleteComment(commentId);
+        return Response.<CommentBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
+    }
+
+    private void deleteComment(String commentId) {
+        boolean isCommentExisted = commentRepository.findById(commentId).isPresent();
+        if (!isCommentExisted) {
+            //If no comment found, stop
+            return;
+        }
+        var comment = commentRepository.findById(commentId).get();
+        if (comment.getReplies().isEmpty()) {
+            //If comment has no replies, safely delete it
+            commentRepository.delete(comment);
+            return;
+        } else {
+            var replies = comment.getReplies();
+            replies.forEach(this::deleteComment);
+            commentRepository.delete(comment);
+        }
+    }
+
 }

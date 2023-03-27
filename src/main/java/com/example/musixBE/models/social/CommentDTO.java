@@ -31,6 +31,4 @@ public class CommentDTO {
     private Long lastModified;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private boolean isAuthor;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private boolean isDeleted;
 }

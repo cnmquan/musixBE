@@ -38,4 +38,19 @@ public class CommentController {
         Response<CommentBody> response = commentService.likeOrDislikeComment(commentId, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @PostMapping("/reply/{commentId}")
+    public ResponseEntity<Response<CommentBody>> replyComment(@PathVariable("commentId") String commentId,
+                                                              @RequestBody CreateCommentRequest request,
+                                                              @RequestHeader("Authorization") String bearerToken) {
+        Response<CommentBody> response = commentService.reply(commentId, request, bearerToken);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Response<CommentBody>> delete(@PathVariable("commentId") String commentId,
+                                                        @RequestHeader("Authorization") String bearerToken) {
+        Response<CommentBody> response = commentService.delete(commentId, bearerToken);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }

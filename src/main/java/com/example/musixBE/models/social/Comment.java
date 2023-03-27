@@ -23,5 +23,4 @@ public class Comment {
     private String content;
     private Long lastModified;
     private boolean isAuthor;
-    private boolean isDeleted;
 }
