@@ -1,6 +1,8 @@
 package com.example.musixBE.services;
 
 import com.example.musixBE.models.music.*;
+import com.example.musixBE.models.social.Comment;
+import com.example.musixBE.models.social.CommentDTO;
 import com.example.musixBE.models.token.Token;
 import com.example.musixBE.models.token.TokenDTO;
 import com.example.musixBE.models.user.Profile;
@@ -15,7 +17,7 @@ import java.util.List;
 @Mapper
 public interface MusixMapper {
 
-    MusixMapper INSTANCE = Mappers.getMapper( MusixMapper.class );
+    MusixMapper INSTANCE = Mappers.getMapper(MusixMapper.class);
 
     ProfileDTO profileToProfileDTO(Profile profile);
 
@@ -46,4 +48,10 @@ public interface MusixMapper {
     Playlist toPlaylist(PlaylistDTO playlistDTO);
 
     MusicDTO musicToMusicDTO(Music music);
+
+    CommentDTO commentToCommentDTO(Comment comment);
+
+    List<CommentDTO> commentListToCommentDTOList(List<Comment> comments);
+
+    Comment toComment(CommentDTO commentDTO);
 }
