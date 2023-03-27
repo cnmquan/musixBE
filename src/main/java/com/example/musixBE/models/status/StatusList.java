@@ -13,4 +13,6 @@ public class StatusList {
     public static final StatusData errorTokenDoesNotMatch = new StatusData(459, "Token does not match with the email");
     public static final StatusData errorPlaylistNotFound = new StatusData(460, "Playlist Not Found");
     public static final StatusData errorPlaylistExisted = new StatusData(461, "Playlist Existed");
+    public static final StatusData errorCommentNotFound = new StatusData(462, "Comment Not Found");
+    public static final StatusData errorUsernameDoesNotMatch = new StatusData(463, "Username Does Not Match");
 }
