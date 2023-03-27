@@ -65,8 +65,7 @@ public class AuthenticationService {
         if (token == null) {
             randomToken = RandomString.getAlphaNumericString(6);
             tokenUtils.saveResetPasswordToken(user, randomToken);
-        }
-        else{
+        } else {
             randomToken = token.getToken();
         }
         emailService.sendResetPasswordEmail(user, randomToken);
@@ -242,7 +241,7 @@ public class AuthenticationService {
             );
 
             // Get Token from Database
-            var token = getValidToken(user);
+            var token = getValidTokenByUserAndType(user, TokenType.BEARER);
             if (token != null) {
                 return Response.<AuthenticationBody>builder()
                         .status(StatusList.successService.getStatus())
@@ -275,6 +274,7 @@ public class AuthenticationService {
                     .msg(exception.getMessage())
                     .build();
         } catch (Exception e) {
+            System.out.println(e);
             return Response.<AuthenticationBody>builder()
                     .status(StatusList.errorService.getStatus())
                     .msg(StatusList.errorService.getMsg())
