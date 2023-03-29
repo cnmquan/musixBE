@@ -1,6 +1,5 @@
 package com.example.musixBE.models.social;
 
-import com.example.musixBE.utils.FileType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,9 +22,14 @@ public class PostDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String content;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private List<String> comments;
+    private String sourceId;
+    @JsonInclude()
+    private String thumbnailId;
+    // nullable
+    @JsonInclude()
+    private String thumbnailUrl;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private FileType fileType;
+    private List<String> comments;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long dateCreated;
     @JsonInclude(JsonInclude.Include.NON_NULL)

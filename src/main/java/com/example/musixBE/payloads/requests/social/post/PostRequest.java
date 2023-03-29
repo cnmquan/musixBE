@@ -1,6 +1,5 @@
 package com.example.musixBE.payloads.requests.social.post;
 
-import com.example.musixBE.utils.FileType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +13,5 @@ import org.springframework.web.multipart.MultipartFile;
 public class PostRequest {
     private String content;
     private MultipartFile file;
-    private FileType fileType;
+    private MultipartFile thumbnail;
 }

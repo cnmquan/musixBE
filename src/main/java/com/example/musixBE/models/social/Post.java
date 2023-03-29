@@ -1,6 +1,5 @@
 package com.example.musixBE.models.social;
 
-import com.example.musixBE.utils.FileType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,11 +16,12 @@ import java.util.List;
 public class Post {
     private String id;
     private String ownerId;
-    private String cloudId;
     private String ownerUsername;
+    private String sourceId;
+    private String thumbnailId;
     private String content;
+    private String thumbnailUrl;
     private List<String> comments;
-    private FileType fileType;
     private Long dateCreated;
     private Long lastModified;
     private List<String> likedBy;

@@ -37,21 +37,28 @@ public class PostService {
             if (!isUserExisted || username == null) {
                 return Response.<PostBody>builder().status(StatusList.errorUsernameNotFound.getStatus()).msg(StatusList.errorUsernameNotFound.getMsg()).build();
             }
-            var cloudId = username + "/social/post/" + UUID.randomUUID();
+            var cloudId = UUID.randomUUID();
+            var sourceId = username + "/social/post/source/" + cloudId;
             User user = userRepository.findByUsername(username).get();
-            var uploadUrl = fileUtils.upload(request.getFile(), cloudId);
+            var dataUrl = fileUtils.upload(request.getFile(), sourceId);
+
             Post post = Post.builder()
                     .ownerId(user.getId())
                     .ownerUsername(user.getUsername())
-                    .cloudId(cloudId)
+                    .sourceId(sourceId)
                     .comments(new ArrayList<>())
                     .content(request.getContent())
                     .dateCreated(System.currentTimeMillis())
                     .lastModified(System.currentTimeMillis())
                     .likedBy(new ArrayList<>())
-                    .fileType(request.getFileType())
-                    .dataUrl(uploadUrl)
+                    .dataUrl(dataUrl)
                     .build();
+            if (request.getThumbnail() != null) {
+                var thumbnailId = username + "/social/post/thumbnail/" + cloudId;
+                var thumbnailUrl = fileUtils.upload(request.getThumbnail(), thumbnailId);
+                post.setThumbnailId(thumbnailId);
+                post.setThumbnailUrl(thumbnailUrl);
+            }
             postRepository.save(post);
             return Response.<PostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).build();
         } catch (IOException e) {
@@ -85,15 +92,27 @@ public class PostService {
                         .msg(StatusList.errorUsernameDoesNotMatch.getMsg())
                         .build();
             }
-            var newCloudId = username + "/social/post/" + UUID.randomUUID();
-            var uploadUrl = fileUtils.upload(request.getFile(), newCloudId);
-            fileUtils.destroy(post.getCloudId(), post.getFileType());
-            post.setContent(request.getContent());
-            post.setDataUrl(uploadUrl);
-            post.setFileType(request.getFileType());
-            post.setCloudId(newCloudId);
-            post.setLastModified(System.currentTimeMillis());
+            if (request.getContent() != null) {
+                post.setContent(request.getContent());
+            }
+            var newCloudId = UUID.randomUUID();
+            if (request.getFile() != null) {
+                var newSourceId = username + "/social/post/source/" + newCloudId;
+                var newDataUrl = fileUtils.upload(request.getFile(), newSourceId);
 
+                fileUtils.destroy(post.getSourceId(), FileType.video);
+                post.setSourceId(newSourceId);
+                post.setDataUrl(newDataUrl);
+            }
+            if (request.getThumbnail() != null) {
+                var newThumbnailId = username + "/social/post/thumbnail/" + newCloudId;
+                var newThumbnailUrl = fileUtils.upload(request.getThumbnail(), newThumbnailId);
+                if (post.getThumbnailId() != null) {
+                    fileUtils.destroy(post.getThumbnailId(), FileType.image);
+                }
+                post.setThumbnailId(newThumbnailId);
+                post.setThumbnailUrl(newThumbnailUrl);
+            }
             postRepository.save(post);
             return Response.<PostBody>builder()
                     .status(StatusList.successService.getStatus())
