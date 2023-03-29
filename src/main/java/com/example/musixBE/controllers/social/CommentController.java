@@ -1,7 +1,7 @@
 package com.example.musixBE.controllers.social;
 
-import com.example.musixBE.payloads.requests.social.CreateCommentRequest;
-import com.example.musixBE.payloads.requests.social.ModifyCommentRequest;
+import com.example.musixBE.payloads.requests.social.comment.CreateCommentRequest;
+import com.example.musixBE.payloads.requests.social.comment.ModifyCommentRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.social.CommentBody;
 import com.example.musixBE.services.social.CommentService;
@@ -22,19 +22,22 @@ public class CommentController {
     }
 
     @PostMapping()
-    public ResponseEntity<Response<CommentBody>> createComment(@RequestBody CreateCommentRequest request, @RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<Response<CommentBody>> createComment(@RequestBody CreateCommentRequest request,
+                                                               @RequestHeader("Authorization") String bearerToken) {
         var response = commentService.createComment(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping()
-    public ResponseEntity<Response<CommentBody>> modifiedComment(@RequestBody ModifyCommentRequest request, @RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<Response<CommentBody>> modifiedComment(@RequestBody ModifyCommentRequest request,
+                                                                 @RequestHeader("Authorization") String bearerToken) {
         Response<CommentBody> response = commentService.modifiedComment(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("/like/{commentId}")
-    public ResponseEntity<Response<CommentBody>> likeOrDislikeComment(@PathVariable("commentId") String commentId, @RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<Response<CommentBody>> likeOrDislikeComment(@PathVariable("commentId") String commentId,
+                                                                      @RequestHeader("Authorization") String bearerToken) {
         Response<CommentBody> response = commentService.likeOrDislikeComment(commentId, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
