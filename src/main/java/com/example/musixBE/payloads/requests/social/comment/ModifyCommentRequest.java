@@ -1,4 +1,4 @@
-package com.example.musixBE.payloads.requests.social;
+package com.example.musixBE.payloads.requests.social.comment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -15,4 +15,6 @@ public class StatusList {
     public static final StatusData errorPlaylistExisted = new StatusData(461, "Playlist Existed");
     public static final StatusData errorCommentNotFound = new StatusData(462, "Comment Not Found");
     public static final StatusData errorUsernameDoesNotMatch = new StatusData(463, "Username Does Not Match");
+    public static final StatusData errorPostNotFound = new StatusData(464, "Post Not Found");
+    public static final StatusData errorCommentNotFoundOnProvidedPost = new StatusData(465, "Comment Not Found On Provided Post");
 }

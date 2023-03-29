@@ -3,14 +3,15 @@ package com.example.musixBE.services.social;
 import com.example.musixBE.models.social.Comment;
 import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.user.User;
-import com.example.musixBE.payloads.requests.social.CreateCommentRequest;
-import com.example.musixBE.payloads.requests.social.ModifyCommentRequest;
+import com.example.musixBE.payloads.requests.social.comment.CreateCommentRequest;
+import com.example.musixBE.payloads.requests.social.comment.ModifyCommentRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.social.CommentBody;
 import com.example.musixBE.repositories.CommentRepository;
 import com.example.musixBE.repositories.UserRepository;
 import com.example.musixBE.services.JwtService;
 import com.example.musixBE.services.MusixMapper;
+import com.example.musixBE.utils.CommentUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final CommentUtils commentUtils;
     private final MusixMapper musixMapper = MusixMapper.INSTANCE;
 
     public Response<CommentBody> getComment(String commentId) {
@@ -191,29 +193,12 @@ public class CommentService {
                     .msg(StatusList.errorUsernameDoesNotMatch.getMsg())
                     .build();
         }
-        deleteComment(commentId);
+        commentUtils.deleteComment(commentId);
         return Response.<CommentBody>builder()
                 .status(StatusList.successService.getStatus())
                 .msg(StatusList.successService.getMsg())
                 .build();
     }
 
-    private void deleteComment(String commentId) {
-        boolean isCommentExisted = commentRepository.findById(commentId).isPresent();
-        if (!isCommentExisted) {
-            //If no comment found, stop
-            return;
-        }
-        var comment = commentRepository.findById(commentId).get();
-        if (comment.getReplies().isEmpty()) {
-            //If comment has no replies, safely delete it
-            commentRepository.delete(comment);
-            return;
-        } else {
-            var replies = comment.getReplies();
-            replies.forEach(this::deleteComment);
-            commentRepository.delete(comment);
-        }
-    }
 
 }
