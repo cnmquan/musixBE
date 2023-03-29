@@ -1,8 +1,11 @@
 package com.example.musixBE.services.social;
 
+import com.example.musixBE.models.social.Comment;
 import com.example.musixBE.models.social.Post;
 import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.user.User;
+import com.example.musixBE.payloads.requests.social.comment.CreateCommentRequest;
+import com.example.musixBE.payloads.requests.social.post.DeleteCommentRequest;
 import com.example.musixBE.payloads.requests.social.post.PostRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.social.PostBody;
@@ -11,6 +14,7 @@ import com.example.musixBE.repositories.PostRepository;
 import com.example.musixBE.repositories.UserRepository;
 import com.example.musixBE.services.JwtService;
 import com.example.musixBE.services.MusixMapper;
+import com.example.musixBE.utils.CommentUtils;
 import com.example.musixBE.utils.FileType;
 import com.example.musixBE.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,6 +33,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final JwtService jwtService;
     private final FileUtils fileUtils;
+    private final CommentUtils commentUtils;
     private final MusixMapper musixMapper = MusixMapper.INSTANCE;
 
     public Response<PostBody> createPost(PostRequest request, String bearerToken) {
@@ -71,7 +77,7 @@ public class PostService {
         try {
             final String username = jwtService.extractUsername(bearerToken.substring(7));
             boolean isUserExisted = userRepository.findByUsername(username).isPresent();
-            if (!isUserExisted) {
+            if (!isUserExisted || username == null) {
                 return Response.<PostBody>builder()
                         .status(StatusList.errorUsernameNotFound.getStatus())
                         .msg(StatusList.errorUsernameNotFound.getMsg()).build();
@@ -126,5 +132,158 @@ public class PostService {
         }
 
 
+    }
+
+    public Response<PostBody> likeOrDislikePost(String postId, String bearerToken) {
+        String username = jwtService.extractUsername(bearerToken.substring(7));
+        boolean isUserExisted = userRepository.findByUsername(username).isPresent();
+        if (!isUserExisted || username == null) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorUsernameNotFound.getStatus())
+                    .msg(StatusList.errorUsernameNotFound.getMsg())
+                    .build();
+        }
+        boolean isPostExisted = postRepository.findById(postId).isPresent();
+        if (!isPostExisted) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorPostNotFound.getStatus())
+                    .msg(StatusList.errorPostNotFound.getMsg())
+                    .build();
+        }
+        Post post = postRepository.findById(postId).get();
+        List<String> listLikedBy = post.getLikedBy();
+        if (listLikedBy.contains(username)) {
+            listLikedBy.remove(username);
+        } else {
+            listLikedBy.add(username);
+        }
+        post.setLikedBy(listLikedBy);
+
+        postRepository.save(post);
+
+        return Response.<PostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
+    }
+
+    public Response<PostBody> createComment(String postId,
+                                            CreateCommentRequest request,
+                                            String bearerToken) {
+        String username = jwtService.extractUsername(bearerToken.substring(7));
+        boolean isUserExisted = userRepository.findByUsername(username).isPresent();
+        if (!isUserExisted || username == null) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorUsernameNotFound.getStatus())
+                    .msg(StatusList.errorUsernameNotFound.getMsg())
+                    .build();
+        }
+        boolean isPostExisted = postRepository.findById(postId).isPresent();
+        if (!isPostExisted) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorPostNotFound.getStatus())
+                    .msg(StatusList.errorPostNotFound.getMsg())
+                    .build();
+        }
+        User user = userRepository.findByUsername(username).get();
+        Post post = postRepository.findById(postId).get();
+        Comment comment = Comment.builder()
+                .ownerId(user.getId())
+                .ownerUsername(user.getUsername())
+                .replies(new ArrayList<>())
+                .likedBy(new ArrayList<>())
+                .dateCreated(System.currentTimeMillis())
+                .lastModified(System.currentTimeMillis())
+                .content(request.getContent())
+                // is author should be set as true in the reply API
+                .isAuthor(false)
+                .build();
+        commentRepository.save(comment);
+        List<String> commentsId = post.getComments();
+        commentsId.add(comment.getId());
+        post.setComments(commentsId);
+        postRepository.save(post);
+        return Response.<PostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
+    }
+
+    public Response<PostBody> deleteComment(DeleteCommentRequest request, String bearerToken) {
+        String username = jwtService.extractUsername(bearerToken.substring(7));
+        boolean isUserExisted = userRepository.findByUsername(username).isPresent();
+        if (!isUserExisted || username == null) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorUsernameNotFound.getStatus())
+                    .msg(StatusList.errorUsernameNotFound.getMsg())
+                    .build();
+        }
+        boolean isPostExisted = postRepository.findById(request.getPostId()).isPresent();
+        if (!isPostExisted) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorPostNotFound.getStatus())
+                    .msg(StatusList.errorPostNotFound.getMsg())
+                    .build();
+        }
+        boolean isCommentExisted = commentRepository.findById(request.getCommentId()).isPresent();
+        if (!isCommentExisted) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorCommentNotFound.getStatus())
+                    .msg(StatusList.errorCommentNotFound.getMsg())
+                    .build();
+        }
+        Post post = postRepository.findById(request.getPostId()).get();
+        List<String> commentsId = post.getComments();
+        if (!commentsId.contains(request.getCommentId())) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorCommentNotFoundOnProvidedPost.getStatus())
+                    .msg(StatusList.errorCommentNotFoundOnProvidedPost.getMsg())
+                    .build();
+        }
+
+        Comment comment = commentRepository.findById(request.getCommentId()).get();
+        if (!comment.getOwnerUsername().equals(username)) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorUsernameDoesNotMatch.getStatus())
+                    .msg(StatusList.errorUsernameDoesNotMatch.getMsg())
+                    .build();
+        }
+        commentUtils.deleteComment(comment.getId());
+        return Response.<PostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
+    }
+
+    public Response<PostBody> deletePost(String postId, String bearerToken) {
+        String username = jwtService.extractUsername(bearerToken.substring(7));
+        boolean isUserExisted = userRepository.findByUsername(username).isPresent();
+        if (!isUserExisted || username == null) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorUsernameNotFound.getStatus())
+                    .msg(StatusList.errorUsernameNotFound.getMsg())
+                    .build();
+        }
+        boolean isPostExisted = postRepository.findById(postId).isPresent();
+        if (!isPostExisted) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorPostNotFound.getStatus())
+                    .msg(StatusList.errorPostNotFound.getMsg())
+                    .build();
+        }
+        Post post = postRepository.findById(postId).get();
+        if (!post.getOwnerUsername().equals(username)) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorUsernameDoesNotMatch.getStatus())
+                    .msg(StatusList.errorUsernameDoesNotMatch.getMsg())
+                    .build();
+        }
+        List<String> commentsId = post.getComments();
+        commentsId.forEach(commentUtils::deleteComment);
+        postRepository.deleteById(postId);
+        return Response.<PostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
     }
 }
