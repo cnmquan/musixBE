@@ -4,6 +4,7 @@ import com.example.musixBE.payloads.requests.social.comment.CreateCommentRequest
 import com.example.musixBE.payloads.requests.social.post.DeleteCommentRequest;
 import com.example.musixBE.payloads.requests.social.post.PostRequest;
 import com.example.musixBE.payloads.responses.Response;
+import com.example.musixBE.payloads.responses.social.ListPostBody;
 import com.example.musixBE.payloads.responses.social.PostBody;
 import com.example.musixBE.services.social.PostService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,18 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PostController {
     private final PostService postService;
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<Response<PostBody>> getPostById(@PathVariable("postId") String postId) {
+        Response<PostBody> response = postService.getPostById(postId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping()
+    public ResponseEntity<Response<ListPostBody>> getPostsByUsername(@RequestParam("username") String username) {
+        Response<ListPostBody> response = postService.getPostsByUsername(username);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 
     @PostMapping()
     public ResponseEntity<Response<PostBody>> createPost(@ModelAttribute PostRequest request,
@@ -55,8 +68,8 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Response<PostBody>> deletePost(@PathVariable("postId") String postId,
-                                                         @RequestHeader("Authorization") String bearerToken){
-        Response<PostBody>response = postService.deletePost(postId,bearerToken);
+                                                         @RequestHeader("Authorization") String bearerToken) {
+        Response<PostBody> response = postService.deletePost(postId, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

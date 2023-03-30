@@ -22,7 +22,7 @@ public class PostDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String content;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String sourceId;
+    private String fileId;
     @JsonInclude()
     private String thumbnailId;
     // nullable
@@ -37,5 +37,5 @@ public class PostDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> likedBy;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String dataUrl;
+    private String fileUrl;
 }
