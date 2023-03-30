@@ -8,6 +8,7 @@ import com.example.musixBE.payloads.requests.social.comment.CreateCommentRequest
 import com.example.musixBE.payloads.requests.social.post.DeleteCommentRequest;
 import com.example.musixBE.payloads.requests.social.post.PostRequest;
 import com.example.musixBE.payloads.responses.Response;
+import com.example.musixBE.payloads.responses.social.ListPostBody;
 import com.example.musixBE.payloads.responses.social.PostBody;
 import com.example.musixBE.repositories.CommentRepository;
 import com.example.musixBE.repositories.PostRepository;
@@ -36,6 +37,38 @@ public class PostService {
     private final CommentUtils commentUtils;
     private final MusixMapper musixMapper = MusixMapper.INSTANCE;
 
+    public Response<PostBody> getPostById(String postId) {
+        var post = postRepository.findById(postId);
+        if (post.isEmpty()) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorPostNotFound.getStatus())
+                    .msg(StatusList.errorPostNotFound.getMsg())
+                    .build();
+        }
+        return Response.<PostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .data(new PostBody(musixMapper.postToPostDTO(post.get())))
+                .build();
+
+    }
+
+    public Response<ListPostBody> getPostsByUsername(String username) {
+        var user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            return Response.<ListPostBody>builder()
+                    .status(StatusList.errorUsernameNotFound.getStatus())
+                    .msg(StatusList.errorUsernameNotFound.getMsg())
+                    .build();
+        }
+        var posts = postRepository.findByUsername(user.get().getUsername());
+        return Response.<ListPostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts)))
+                .build();
+    }
+
     public Response<PostBody> createPost(PostRequest request, String bearerToken) {
         try {
             final String username = jwtService.extractUsername(bearerToken.substring(7));
@@ -51,13 +84,13 @@ public class PostService {
             Post post = Post.builder()
                     .ownerId(user.getId())
                     .ownerUsername(user.getUsername())
-                    .sourceId(sourceId)
+                    .fileId(sourceId)
                     .comments(new ArrayList<>())
                     .content(request.getContent())
                     .dateCreated(System.currentTimeMillis())
                     .lastModified(System.currentTimeMillis())
                     .likedBy(new ArrayList<>())
-                    .dataUrl(dataUrl)
+                    .fileUrl(dataUrl)
                     .build();
             if (request.getThumbnail() != null) {
                 var thumbnailId = username + "/social/post/thumbnail/" + cloudId;
@@ -106,9 +139,9 @@ public class PostService {
                 var newSourceId = username + "/social/post/source/" + newCloudId;
                 var newDataUrl = fileUtils.upload(request.getFile(), newSourceId);
 
-                fileUtils.destroy(post.getSourceId(), FileType.video);
-                post.setSourceId(newSourceId);
-                post.setDataUrl(newDataUrl);
+                fileUtils.destroy(post.getFileId(), FileType.video);
+                post.setFileId(newSourceId);
+                post.setFileUrl(newDataUrl);
             }
             if (request.getThumbnail() != null) {
                 var newThumbnailId = username + "/social/post/thumbnail/" + newCloudId;
@@ -286,4 +319,6 @@ public class PostService {
                 .msg(StatusList.successService.getMsg())
                 .build();
     }
+
+
 }

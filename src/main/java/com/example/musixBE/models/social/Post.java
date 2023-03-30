@@ -17,7 +17,7 @@ public class Post {
     private String id;
     private String ownerId;
     private String ownerUsername;
-    private String sourceId;
+    private String fileId;
     private String thumbnailId;
     private String content;
     private String thumbnailUrl;
@@ -25,5 +25,5 @@ public class Post {
     private Long dateCreated;
     private Long lastModified;
     private List<String> likedBy;
-    private String dataUrl;
+    private String fileUrl;
 }
