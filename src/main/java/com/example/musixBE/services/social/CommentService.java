@@ -88,11 +88,12 @@ public class CommentService {
                     .build();
         }
         Comment comment = commentRepository.findById(commentId).get();
+        User user = userRepository.findByUsername(username).get();
         List<String> likedBy = comment.getLikedBy();
-        if (likedBy.contains(username)) {
-            likedBy.remove(username);
+        if (likedBy.contains(user.getId())) {
+            likedBy.remove(user.getId());
         } else {
-            likedBy.add(username);
+            likedBy.add(user.getId());
         }
         commentRepository.save(comment);
         return Response.<CommentBody>builder()

@@ -17,6 +17,12 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
     private final PostService postService;
 
+    @GetMapping("/all")
+    public ResponseEntity<Response<ListPostBody>> getAllPost() {
+        Response<ListPostBody> response = postService.getAllPost();
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @GetMapping("/{postId}")
     public ResponseEntity<Response<PostBody>> getPostById(@PathVariable("postId") String postId) {
         Response<PostBody> response = postService.getPostById(postId);

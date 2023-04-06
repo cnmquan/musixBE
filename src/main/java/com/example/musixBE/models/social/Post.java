@@ -19,6 +19,7 @@ public class Post {
     private String ownerUsername;
     private String fileId;
     private String thumbnailId;
+    private String fileName;
     private String content;
     private String thumbnailUrl;
     private List<String> comments;
