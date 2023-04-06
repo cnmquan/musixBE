@@ -23,6 +23,8 @@ public class PostDTO {
     private String content;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String fileId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String fileName;
     @JsonInclude()
     private String thumbnailId;
     // nullable

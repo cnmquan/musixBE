@@ -85,6 +85,7 @@ public class PostService {
                     .ownerId(user.getId())
                     .ownerUsername(user.getUsername())
                     .fileId(sourceId)
+                    .fileName(request.getFileName())
                     .comments(new ArrayList<>())
                     .content(request.getContent())
                     .dateCreated(System.currentTimeMillis())
@@ -133,6 +134,9 @@ public class PostService {
             }
             if (request.getContent() != null) {
                 post.setContent(request.getContent());
+            }
+            if (request.getFileName() != null) {
+                post.setFileName(request.getFileName());
             }
             var newCloudId = UUID.randomUUID();
             if (request.getFile() != null) {
@@ -184,11 +188,12 @@ public class PostService {
                     .build();
         }
         Post post = postRepository.findById(postId).get();
+        User user = userRepository.findByUsername(username).get();
         List<String> listLikedBy = post.getLikedBy();
-        if (listLikedBy.contains(username)) {
-            listLikedBy.remove(username);
+        if (listLikedBy.contains(user.getId())) {
+            listLikedBy.remove(user.getId());
         } else {
-            listLikedBy.add(username);
+            listLikedBy.add(user.getId());
         }
         post.setLikedBy(listLikedBy);
 
@@ -282,6 +287,8 @@ public class PostService {
                     .build();
         }
         commentUtils.deleteComment(comment.getId());
+        post.getComments().remove(comment.getId());
+        postRepository.save(post);
         return Response.<PostBody>builder()
                 .status(StatusList.successService.getStatus())
                 .msg(StatusList.successService.getMsg())
@@ -321,4 +328,12 @@ public class PostService {
     }
 
 
+    public Response<ListPostBody> getAllPost() {
+        var posts = postRepository.findAll();
+        return Response.<ListPostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts)))
+                .build();
+    }
 }

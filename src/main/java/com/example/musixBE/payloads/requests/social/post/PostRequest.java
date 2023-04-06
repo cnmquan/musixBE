@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class PostRequest {
     private String content;
+    private String fileName;
     private MultipartFile file;
     private MultipartFile thumbnail;
 }
