@@ -7,7 +7,5 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class UploadSongPlaylistRequest {
-    private String username;
     private SongDTO song;
-    private String playlistId;
 }

@@ -11,6 +11,7 @@ import com.example.musixBE.payloads.responses.music.ListSongBody;
 import com.example.musixBE.payloads.responses.music.UserMusicBody;
 import com.example.musixBE.repositories.MusicRepository;
 import com.example.musixBE.repositories.UserRepository;
+import com.example.musixBE.services.JwtService;
 import com.example.musixBE.services.MusixMapper;
 import com.example.musixBE.utils.DateUtils;
 import com.example.musixBE.utils.FileType;
@@ -31,14 +32,21 @@ public class MusicService {
 
     private final FileUtils fileUtils;
 
+    private final JwtService jwtService;
+
     private final MusixMapper mapper = MusixMapper.INSTANCE;
 
-    public Response<UserMusicBody> getUserMusic(GetUserMusicRequest request) {
-        try {
-             var user = userRepository.findByUsername(request.getUsername())
-                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+    public Response<UserMusicBody> getUserMusicByToken(String bearerToken) {
+        final String username = jwtService.extractUsername(bearerToken.substring(7));
+        return getUserMusic(username);
+    }
 
-            var music = musicRepository.findByUsername(request.getUsername());
+    public Response<UserMusicBody> getUserMusic(String username) {
+        try {
+            var user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+
+            var music = musicRepository.findByUsername(username);
             if(music.isEmpty()){
                 var newMusic = Music.builder()
                         .user(User.builder()
@@ -87,16 +95,17 @@ public class MusicService {
         }
     }
 
-    public  Response<ListPlaylistBody> favoritePlaylist(FavoritePlaylistRequest request) {
-        return playlistService(request.getPlaylist(), request.getUsername(), true);
+    public  Response<ListPlaylistBody> favoritePlaylist(FavoritePlaylistRequest request, String bearerToken) {
+        return playlistService(request.getPlaylist(),true, bearerToken);
     }
 
-    public  Response<ListPlaylistBody> dislikePlaylist(DislikePlaylistRequest request) {
-        return playlistService(request.getPlaylist(), request.getUsername(), false);
+    public  Response<ListPlaylistBody> dislikePlaylist(DislikePlaylistRequest request, String bearerToken) {
+        return playlistService(request.getPlaylist(),  false, bearerToken);
     }
 
-    private Response<ListPlaylistBody> playlistService(PlaylistDTO playlist, String username, boolean isFavorite) {
+    private Response<ListPlaylistBody> playlistService(PlaylistDTO playlist, boolean isFavorite, String bearerToken) {
         try {
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
             var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             var playlists = isFavorite ? music.getFavoritePlaylists() : music.getDislikePlaylist();
@@ -147,16 +156,17 @@ public class MusicService {
         }
     }
 
-    public  Response<ListArtistBody> favoriteArtist(FavoriteArtistRequest request) {
-        return artistService(request.getArtist(), request.getUsername(), true);
+    public  Response<ListArtistBody> favoriteArtist(FavoriteArtistRequest request, String bearerToken) {
+        return artistService(request.getArtist(), true, bearerToken);
     }
 
-    public  Response<ListArtistBody> dislikeArtist(DislikeArtistRequest request) {
-        return artistService(request.getArtist(), request.getUsername(), false);
+    public  Response<ListArtistBody> dislikeArtist(DislikeArtistRequest request, String bearerToken) {
+        return artistService(request.getArtist(), false, bearerToken);
     }
 
-    private Response<ListArtistBody> artistService(ArtistDTO artist, String username, boolean isFavorite) {
+    private Response<ListArtistBody> artistService(ArtistDTO artist, boolean isFavorite, String bearerToken) {
         try {
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
             var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             var artists = isFavorite ? music.getFavoriteArtists() : music.getDislikeArtists();
@@ -207,16 +217,17 @@ public class MusicService {
         }
     }
 
-    public  Response<ListSongBody> favoriteSong(FavoriteSongRequest request) {
-        return songService(request.getSong(), request.getUsername(), true);
+    public  Response<ListSongBody> favoriteSong(FavoriteSongRequest request, String bearerToken) {
+        return songService(request.getSong(), true, bearerToken);
     }
 
-    public  Response<ListSongBody> dislikeSong(DislikeSongRequest request) {
-        return songService(request.getSong(), request.getUsername(), false);
+    public  Response<ListSongBody> dislikeSong(DislikeSongRequest request, String bearerToken) {
+        return songService(request.getSong(),false, bearerToken);
     }
 
-    private Response<ListSongBody> songService(SongDTO song, String username, boolean isFavorite) {
+    private Response<ListSongBody> songService(SongDTO song, boolean isFavorite, String bearerToken) {
         try {
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
             var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             var songs = isFavorite ?  music.getFavoriteSongs() : music.getDislikeSongs();
@@ -266,9 +277,10 @@ public class MusicService {
         }
     }
 
-    public Response<ListPlaylistBody> createPlaylist(CreatePlaylistRequest request) {
+    public Response<ListPlaylistBody> createPlaylist(CreatePlaylistRequest request, String bearerToken) {
         try {
-            var music = musicRepository.findByUsername(request.getUsername())
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
 
             var playlists = music.getOwnPlaylists();
@@ -320,15 +332,16 @@ public class MusicService {
         }
     }
 
-    public Response<ListPlaylistBody> changeProfilePlaylist(ChangeProfilePlaylistRequest request) {
+    public Response<ListPlaylistBody> changeProfilePlaylist(String playlistId, ChangeProfilePlaylistRequest request, String bearerToken) {
         try {
-            var music = musicRepository.findByUsername(request.getUsername())
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
 
             var playlists = music.getOwnPlaylists();
             boolean isExisted = false;
             for(var playlistItem : playlists){
-                if(playlistItem.getId().equals(request.getPlaylistId())){
+                if(playlistItem.getId().equals(playlistId)){
                     var index = playlists.indexOf(playlistItem);
                     playlistItem.setTitle(
                             request.getTitle() != null ?
@@ -380,15 +393,16 @@ public class MusicService {
         }
     }
 
-    public Response<ListPlaylistBody> uploadPlaylistThumbnail(UploadPlaylistThumbnailRequest request){
+    public Response<ListPlaylistBody> uploadPlaylistThumbnail(String playlistId, UploadPlaylistThumbnailRequest request, String bearerToken){
         try {
-            var music = musicRepository.findByUsername(request.getUsername())
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             var playlists = music.getOwnPlaylists();
             Playlist playlist = null;
             var index = -1;
             for(var playlistItem : playlists){
-                if(playlistItem.getId().equals(request.getPlaylistId())){
+                if(playlistItem.getId().equals(playlistId)){
                     playlist = playlistItem;
                     index = playlists.indexOf(playlistItem);
                     break;
@@ -439,15 +453,16 @@ public class MusicService {
         }
     }
 
-    public Response<ListPlaylistBody> removePlaylist(RemovePlaylistRequest request){
+    public Response<ListPlaylistBody> removePlaylist(String playlistId, String bearerToken){
         try {
-            var music = musicRepository.findByUsername(request.getUsername())
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
 
             var playlists = music.getOwnPlaylists();
             boolean isExisted = false;
             for(var playlistItem : playlists){
-                if(playlistItem.getId().equals(request.getPlaylistId())){
+                if(playlistItem.getId().equals(playlistId)){
                     isExisted = true;
                     if(playlistItem.getThumbnailId() != null){
                         fileUtils.destroy(playlistItem.getThumbnailId(), FileType.image);
@@ -497,16 +512,17 @@ public class MusicService {
         }
     }
 
-    public Response<ListPlaylistBody> uploadSongPlaylist(UploadSongPlaylistRequest request) {
+    public Response<ListPlaylistBody> uploadSongPlaylist(String playlistId, UploadSongPlaylistRequest request, String bearerToken) {
         try {
-            var music = musicRepository.findByUsername(request.getUsername())
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var music = musicRepository.findByUsername(username)
                     .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
 
             var playlists = music.getOwnPlaylists();
             var song = mapper.toSong(request.getSong());
             boolean isExisted = false;
             for(var playlistItem : playlists){
-                if(playlistItem.getId().equals(request.getPlaylistId())){
+                if(playlistItem.getId().equals(playlistId)){
                     var index = playlists.indexOf(playlistItem);
                     var songs = playlistItem.getSongs();
                     boolean isSongExisted = false;

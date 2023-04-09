@@ -16,9 +16,15 @@ import org.springframework.web.bind.annotation.*;
 public class ProfileController {
     private final ProfileService service;
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<Response<ProfileBody>> getUserInfo(@PathVariable("userId") String userId) {
+        var response = service.getUserProfile(userId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @GetMapping("/info")
-    public ResponseEntity<Response<ProfileBody>> getInfo(@RequestBody GetProfileRequest request) {
-        var response = service.getProfile(request.getId());
+    public ResponseEntity<Response<ProfileBody>> getInfo(@RequestHeader("Authorization") String bearerToken) {
+        var response = service.getProfile(bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -30,28 +36,29 @@ public class ProfileController {
 
     @PutMapping("/info")
     public ResponseEntity<Response<ProfileBody>> uploadInfo(
-            @RequestBody UploadProfileRequest request
+            @RequestBody UploadProfileRequest request,
+            @RequestHeader("Authorization") String bearerToken
     ) {
-        var response = service.updateProfile(request);
+        var response = service.updateProfile(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
 
     }
 
     @PutMapping("/avatar")
-    public ResponseEntity<Response<ProfileBody>> uploadProfile(@ModelAttribute UploadAvatarRequest request) {
-        var response = service.uploadAvatar(request);
+    public ResponseEntity<Response<ProfileBody>> uploadProfile(@ModelAttribute UploadAvatarRequest request, @RequestHeader("Authorization") String bearerToken) {
+        var response = service.uploadAvatar(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PutMapping("/follow")
-    public ResponseEntity<Response<ProfileBody>> followUser(@RequestBody FollowUserRequest request) {
-        var response = service.followUser(request);
+    @PutMapping("/follow/{followId}")
+    public ResponseEntity<Response<ProfileBody>> followUser(@PathVariable("followId") String followId, @RequestHeader("Authorization") String bearerToken) {
+        var response = service.followUser(followId, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PostMapping("/changePassword")
-    public ResponseEntity<Response> changePassword(@RequestBody ChangePasswordRequest request) {
-        var response = service.changePassword(request);
+    public ResponseEntity<Response> changePassword(@RequestBody ChangePasswordRequest request, @RequestHeader("Authorization") String bearerToken) {
+        var response = service.changePassword(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

@@ -17,75 +17,99 @@ import org.springframework.web.bind.annotation.*;
 public class MusicController {
     private final MusicService service;
 
+    @GetMapping("/{username}")
+    public ResponseEntity<Response<UserMusicBody>> getOtherUserMusic(@PathVariable("username") String username) {
+        var response = service.getUserMusic(username);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @GetMapping
-    public ResponseEntity<Response<UserMusicBody>> getUserMusic(@RequestBody GetUserMusicRequest request){
-        var response = service.getUserMusic(request);
+    public ResponseEntity<Response<UserMusicBody>> getUserMusic(@RequestHeader("Authorization") String bearerToken) {
+        var response = service.getUserMusicByToken(bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("/playlist/favorite")
-    public ResponseEntity<Response<ListPlaylistBody>> favoritePlaylist(@RequestBody FavoritePlaylistRequest request){
-        var response = service.favoritePlaylist(request);
+    public ResponseEntity<Response<ListPlaylistBody>> favoritePlaylist(@RequestBody FavoritePlaylistRequest request,
+                                                                       @RequestHeader("Authorization") String bearerToken) {
+        var response = service.favoritePlaylist(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("/playlist/dislike")
-    public ResponseEntity<Response<ListPlaylistBody>> dislikePlaylist(@RequestBody DislikePlaylistRequest request){
-        var response = service.dislikePlaylist(request);
+    public ResponseEntity<Response<ListPlaylistBody>> dislikePlaylist(@RequestBody DislikePlaylistRequest request,
+                                                                      @RequestHeader("Authorization") String bearerToken) {
+        var response = service.dislikePlaylist(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("/artist/favorite")
-    public ResponseEntity<Response<ListArtistBody>> favoriteArtist(@RequestBody FavoriteArtistRequest request){
-        var response = service.favoriteArtist(request);
+    public ResponseEntity<Response<ListArtistBody>> favoriteArtist(@RequestBody FavoriteArtistRequest request,
+                                                                   @RequestHeader("Authorization") String bearerToken) {
+        var response = service.favoriteArtist(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("/artist/dislike")
-    public ResponseEntity<Response<ListArtistBody>> dislikeArtist(@RequestBody DislikeArtistRequest request){
-        var response = service.dislikeArtist(request);
+    public ResponseEntity<Response<ListArtistBody>> dislikeArtist(@RequestBody DislikeArtistRequest request,
+                                                                  @RequestHeader("Authorization") String bearerToken) {
+        var response = service.dislikeArtist(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("/song/favorite")
-    public ResponseEntity<Response<ListSongBody>> favoriteSong(@RequestBody FavoriteSongRequest request){
-        var response = service.favoriteSong(request);
+    public ResponseEntity<Response<ListSongBody>> favoriteSong(@RequestBody FavoriteSongRequest request,
+                                                               @RequestHeader("Authorization") String bearerToken) {
+        var response = service.favoriteSong(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("/song/dislike")
-    public ResponseEntity<Response<ListSongBody>> dislikeSong(@RequestBody DislikeSongRequest request){
-        var response = service.dislikeSong(request);
+    public ResponseEntity<Response<ListSongBody>> dislikeSong(@RequestBody DislikeSongRequest request,
+                                                              @RequestHeader("Authorization") String bearerToken) {
+        var response = service.dislikeSong(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PostMapping("/playlist/create")
-    public ResponseEntity<Response<ListPlaylistBody>> createPlaylist(@RequestBody CreatePlaylistRequest request){
-        var response = service.createPlaylist(request);
+    @PostMapping("/ownPlaylist")
+    public ResponseEntity<Response<ListPlaylistBody>> createPlaylist(@RequestBody CreatePlaylistRequest request,
+                                                                     @RequestHeader("Authorization") String bearerToken) {
+        var response = service.createPlaylist(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PutMapping("/playlist/changeProfile")
-    public ResponseEntity<Response<ListPlaylistBody>> changeProfilePlaylist(@RequestBody ChangeProfilePlaylistRequest request){
-        var response = service.changeProfilePlaylist(request);
+    @PutMapping("/ownPlaylist/{playlistId}/changeProfile")
+    public ResponseEntity<Response<ListPlaylistBody>> changeProfilePlaylist(
+            @PathVariable("playlistId") String playlistId,
+            @RequestBody ChangeProfilePlaylistRequest request,
+            @RequestHeader("Authorization") String bearerToken) {
+        var response = service.changeProfilePlaylist(playlistId, request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PutMapping("/playlist/uploadThumbnail")
-    public ResponseEntity<Response<ListPlaylistBody>> uploadPlaylistThumbnail(@ModelAttribute UploadPlaylistThumbnailRequest request){
-        var response = service.uploadPlaylistThumbnail(request);
+    @PutMapping("/ownPlaylist/{playlistId}/uploadThumbnail")
+    public ResponseEntity<Response<ListPlaylistBody>> uploadPlaylistThumbnail(
+            @PathVariable("playlistId") String playlistId,
+            @ModelAttribute UploadPlaylistThumbnailRequest request,
+            @RequestHeader("Authorization") String bearerToken) {
+        var response = service.uploadPlaylistThumbnail(playlistId, request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @DeleteMapping("/playlist/remove")
-    public ResponseEntity<Response<ListPlaylistBody>> removePlaylist(@RequestBody RemovePlaylistRequest request){
-        var response = service.removePlaylist(request);
+    @DeleteMapping("/ownPlaylist/{playlistId}")
+    public ResponseEntity<Response<ListPlaylistBody>> removePlaylist(
+            @PathVariable("playlistId") String playlistId,
+            @RequestHeader("Authorization") String bearerToken) {
+        var response = service.removePlaylist(playlistId, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PutMapping("/playlist/uploadSong")
-    public ResponseEntity<Response<ListPlaylistBody>> uploadSongPlaylist(@RequestBody UploadSongPlaylistRequest request){
-        var response = service.uploadSongPlaylist(request);
+    @PutMapping("/ownPlaylist/{playlistId}/uploadSong")
+    public ResponseEntity<Response<ListPlaylistBody>> uploadSongPlaylist(
+            @PathVariable("playlistId") String playlistId,
+            @RequestBody UploadSongPlaylistRequest request,
+            @RequestHeader("Authorization") String bearerToken) {
+        var response = service.uploadSongPlaylist(playlistId, request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

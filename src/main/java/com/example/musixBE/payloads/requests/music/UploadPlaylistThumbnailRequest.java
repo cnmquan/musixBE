@@ -7,7 +7,5 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 @NoArgsConstructor
 public class UploadPlaylistThumbnailRequest {
-    private String username;
-    private String playlistId;
     private MultipartFile thumbnail;
 }

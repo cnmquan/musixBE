@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class DislikePlaylistRequest {
-    private String username;
     private PlaylistDTO playlist;
 }

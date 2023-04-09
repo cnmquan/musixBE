@@ -6,8 +6,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ChangeProfilePlaylistRequest {
-    private String username;
-    private String playlistId;
     private String title;
     private String sortDescription;
 }

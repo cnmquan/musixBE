@@ -9,5 +9,4 @@ import lombok.NoArgsConstructor;
 public class CreatePlaylistRequest {
     private String title;
     private String sortDescription;
-    private String username;
 }
