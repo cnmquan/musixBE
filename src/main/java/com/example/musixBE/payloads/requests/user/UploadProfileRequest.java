@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UploadProfileRequest {
-    private String id;
     private String fullName;
     private String avatarUri;
     private String birthday;

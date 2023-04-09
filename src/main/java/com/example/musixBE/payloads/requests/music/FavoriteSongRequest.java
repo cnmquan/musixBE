@@ -11,5 +11,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FavoriteSongRequest {
     private SongDTO song;
-    private String username;
 }

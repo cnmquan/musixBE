@@ -4,7 +4,6 @@ import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.user.Profile;
 import com.example.musixBE.models.user.User;
 import com.example.musixBE.payloads.requests.authentication.ChangePasswordRequest;
-import com.example.musixBE.payloads.requests.user.FollowUserRequest;
 import com.example.musixBE.payloads.requests.user.SearchProfileRequest;
 import com.example.musixBE.payloads.requests.user.UploadAvatarRequest;
 import com.example.musixBE.payloads.requests.user.UploadProfileRequest;
@@ -12,6 +11,7 @@ import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.user.ListProfileBody;
 import com.example.musixBE.payloads.responses.user.ProfileBody;
 import com.example.musixBE.repositories.UserRepository;
+import com.example.musixBE.services.JwtService;
 import com.example.musixBE.services.MusixMapper;
 import com.example.musixBE.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
@@ -37,9 +37,11 @@ public class ProfileService {
 
     private final FileUtils fileUtils;
 
+    private final JwtService jwtService;
+
     private final PasswordEncoder passwordEncoder;
 
-    public Response<ProfileBody> getProfile(String id) {
+    public Response<ProfileBody> getUserProfile(String id) {
         try {
             var user = userRepository.findById(id)
                     .orElseThrow(() -> new Exception(StatusList.errorUserIdNotFound.getMsg()));
@@ -65,10 +67,38 @@ public class ProfileService {
         }
     }
 
-    public Response<ProfileBody> updateProfile(UploadProfileRequest request) {
+    public Response<ProfileBody> getProfile(String bearerToken) {
         try {
-            var user = userRepository.findById(request.getId())
-                    .orElseThrow(() -> new Exception(StatusList.errorUserIdNotFound.getMsg()));
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+            return  Response.<ProfileBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(ProfileBody.builder()
+                            .user(musixMapper.userToUserDTO(user))
+                            .build())
+                    .build();
+        } catch (Exception e) {
+            if (e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
+                return Response.<ProfileBody>builder()
+                        .status(StatusList.errorUsernameNotFound.getStatus())
+                        .msg(StatusList.errorUsernameNotFound.getMsg())
+                        .build();
+            } else {
+                return Response.<ProfileBody>builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(e.getMessage())
+                        .build();
+            }
+        }
+    }
+
+    public Response<ProfileBody> updateProfile(UploadProfileRequest request, String bearerToken) {
+        try {
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             var profile = Profile.builder()
                     .fullName(request.getFullName() != null ? request.getFullName() : user.getProfile().getFullName())
                     .phoneNumber(
@@ -88,10 +118,10 @@ public class ProfileService {
                             .build())
                     .build();
         } catch (Exception e) {
-            if (e.getMessage().equals(StatusList.errorUserIdNotFound.getMsg())){
+            if (e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
                 return Response.<ProfileBody>builder()
-                        .status(StatusList.errorUserIdNotFound.getStatus())
-                        .msg(StatusList.errorUserIdNotFound.getMsg())
+                        .status(StatusList.errorUsernameNotFound.getStatus())
+                        .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
             } else {
                 return Response.<ProfileBody>builder()
@@ -102,10 +132,11 @@ public class ProfileService {
         }
     }
 
-    public Response<ProfileBody> uploadAvatar(UploadAvatarRequest request) {
+    public Response<ProfileBody> uploadAvatar(UploadAvatarRequest request, String bearerToken) {
         try {
-            var user = userRepository.findById(request.getId())
-                    .orElseThrow(() -> new Exception(StatusList.errorUserIdNotFound.getMsg()));
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             var avatarId = user.getProfile().getAvatarId();
             if(avatarId == null){
                 avatarId = user.getId()+"/profile/avatar";
@@ -129,10 +160,10 @@ public class ProfileService {
                     .build();
         }
         catch (Exception e) {
-            if (e.getMessage().equals(StatusList.errorUserIdNotFound.getMsg())){
+            if (e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
                 return Response.<ProfileBody>builder()
-                        .status(StatusList.errorUserIdNotFound.getStatus())
-                        .msg(StatusList.errorUserIdNotFound.getMsg())
+                        .status(StatusList.errorUsernameNotFound.getStatus())
+                        .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
             } else {
                 return Response.<ProfileBody>builder()
@@ -155,26 +186,20 @@ public class ProfileService {
                     .build();
         }
         catch (Exception e) {
-            if (e.getMessage().equals(StatusList.errorUserIdNotFound.getMsg())){
-                return Response.<ListProfileBody>builder()
-                        .status(StatusList.errorUserIdNotFound.getStatus())
-                        .msg(StatusList.errorUserIdNotFound.getMsg())
-                        .build();
-            } else {
-                return Response.<ListProfileBody>builder()
-                        .status(StatusList.errorService.getStatus())
-                        .msg(e.getMessage())
-                        .build();
-            }
+            return Response.<ListProfileBody>builder()
+                    .status(StatusList.errorService.getStatus())
+                    .msg(e.getMessage())
+                    .build();
         }
     }
 
-    public Response<ProfileBody> followUser(FollowUserRequest request) {
+    public Response<ProfileBody> followUser(String followId, String bearerToken) {
         try {
             // Get Info User and User that user is followed
-            var user = userRepository.findById(request.getId())
-                    .orElseThrow(() -> new Exception(StatusList.errorUserIdNotFound.getMsg()));
-            var userFollowing = userRepository.findById(request.getFollowId())
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+            var userFollowing = userRepository.findById(followId)
                     .orElseThrow(() -> new Exception(StatusList.errorUserIdNotFound.getMsg()));
 
             // Get List Following of User and Follower of Following User
@@ -230,7 +255,13 @@ public class ProfileService {
                             .build())
                     .build();
         } catch (Exception e) {
-            if (e.getMessage().equals(StatusList.errorUserIdNotFound.getMsg())){
+            if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
+                return Response.<ProfileBody>builder()
+                        .status(StatusList.errorUsernameNotFound.getStatus())
+                        .msg(StatusList.errorUsernameNotFound.getMsg())
+                        .build();
+            }
+            else if (e.getMessage().equals(StatusList.errorUserIdNotFound.getMsg())){
                 return Response.<ProfileBody>builder()
                         .status(StatusList.errorUserIdNotFound.getStatus())
                         .msg(StatusList.errorUserIdNotFound.getMsg())
@@ -244,10 +275,11 @@ public class ProfileService {
         }
     }
 
-    public Response changePassword(ChangePasswordRequest request) {
+    public Response changePassword(ChangePasswordRequest request, String bearerToken) {
         try {
-            var user = userRepository.findById(request.getId())
-                    .orElseThrow(() -> new Exception(StatusList.errorUserIdNotFound.getMsg()));
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
             if(passwordEncoder.matches(request.getPassword(), user.getPassword())){
                 user.setPassword(passwordEncoder.encode(request.getNewPassword()));
                 final var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
@@ -261,10 +293,10 @@ public class ProfileService {
                     .msg(StatusList.successService.getMsg())
                     .build();
         } catch(Exception e){
-            if(e.getMessage().equals(StatusList.errorUserIdNotFound.getMsg())){
+            if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
                 return Response.builder()
-                        .status(StatusList.errorUserIdNotFound.getStatus())
-                        .msg(StatusList.errorUserIdNotFound.getMsg())
+                        .status(StatusList.errorUsernameNotFound.getStatus())
+                        .msg(StatusList.errorUsernameNotFound.getMsg())
                         .build();
             } else if (e.getMessage().equals(StatusList.errorPasswordNotCorrect.getMsg())){
                 return Response.builder()

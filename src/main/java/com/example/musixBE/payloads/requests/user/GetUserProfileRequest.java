@@ -1,5 +1,6 @@
 package com.example.musixBE.payloads.requests.user;
 
+import com.example.musixBE.payloads.requests.Request;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FollowUserRequest {
+public class GetUserProfileRequest extends Request {
     private String id;
-    private String followId;
 }
