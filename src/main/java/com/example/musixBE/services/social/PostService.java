@@ -209,53 +209,7 @@ public class PostService {
                 .build();
     }
 
-    public Response<PostBody> deleteComment(DeleteCommentRequest request, String bearerToken) {
-        String username = jwtService.extractUsername(bearerToken.substring(7));
-        boolean isUserExisted = userRepository.findByUsername(username).isPresent();
-        if (!isUserExisted || username == null) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorUsernameNotFound.getStatus())
-                    .msg(StatusList.errorUsernameNotFound.getMsg())
-                    .build();
-        }
-        boolean isPostExisted = postRepository.findById(request.getPostId()).isPresent();
-        if (!isPostExisted) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorPostNotFound.getStatus())
-                    .msg(StatusList.errorPostNotFound.getMsg())
-                    .build();
-        }
-        boolean isCommentExisted = commentRepository.findById(request.getCommentId()).isPresent();
-        if (!isCommentExisted) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorCommentNotFound.getStatus())
-                    .msg(StatusList.errorCommentNotFound.getMsg())
-                    .build();
-        }
-        Post post = postRepository.findById(request.getPostId()).get();
-        List<String> commentsId = post.getComments();
-        if (!commentsId.contains(request.getCommentId())) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorCommentNotFoundOnProvidedPost.getStatus())
-                    .msg(StatusList.errorCommentNotFoundOnProvidedPost.getMsg())
-                    .build();
-        }
 
-        Comment comment = commentRepository.findById(request.getCommentId()).get();
-        if (!comment.getOwnerUsername().equals(username)) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorUsernameDoesNotMatch.getStatus())
-                    .msg(StatusList.errorUsernameDoesNotMatch.getMsg())
-                    .build();
-        }
-        commentUtils.deleteComment(comment.getId());
-        post.getComments().remove(comment.getId());
-        postRepository.save(post);
-        return Response.<PostBody>builder()
-                .status(StatusList.successService.getStatus())
-                .msg(StatusList.successService.getMsg())
-                .build();
-    }
 
     public Response<PostBody> deletePost(String postId, String bearerToken) {
         String username = jwtService.extractUsername(bearerToken.substring(7));
