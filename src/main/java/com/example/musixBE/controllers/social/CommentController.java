@@ -29,9 +29,9 @@ public class CommentController {
     }
 
     @PutMapping()
-    public ResponseEntity<Response<CommentBody>> modifiedComment(@RequestBody ModifyCommentRequest request,
-                                                                 @RequestHeader("Authorization") String bearerToken) {
-        Response<CommentBody> response = commentService.modifiedComment(request, bearerToken);
+    public ResponseEntity<Response<CommentBody>> modifyComment(@RequestBody ModifyCommentRequest request,
+                                                               @RequestHeader("Authorization") String bearerToken) {
+        Response<CommentBody> response = commentService.modifyComment(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

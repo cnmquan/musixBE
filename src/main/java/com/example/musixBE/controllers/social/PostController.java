@@ -1,6 +1,5 @@
 package com.example.musixBE.controllers.social;
 
-import com.example.musixBE.payloads.requests.social.comment.CreateCommentRequest;
 import com.example.musixBE.payloads.requests.social.post.DeleteCommentRequest;
 import com.example.musixBE.payloads.requests.social.post.PostRequest;
 import com.example.musixBE.payloads.responses.Response;
@@ -54,14 +53,6 @@ public class PostController {
     public ResponseEntity<Response<PostBody>> likeOrDislikePost(@PathVariable("postId") String postId,
                                                                 @RequestHeader("Authorization") String bearerToken) {
         Response<PostBody> response = postService.likeOrDislikePost(postId, bearerToken);
-        return ResponseEntity.status(response.getStatus()).body(response);
-    }
-
-    @PostMapping("/comment/{postId}")
-    public ResponseEntity<Response<PostBody>> commentPost(@PathVariable("postId") String postId,
-                                                          @RequestBody CreateCommentRequest request,
-                                                          @RequestHeader("Authorization") String bearerToken) {
-        Response<PostBody> response = postService.createComment(postId, request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

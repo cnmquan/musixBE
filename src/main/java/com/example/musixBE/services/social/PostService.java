@@ -4,7 +4,6 @@ import com.example.musixBE.models.social.Comment;
 import com.example.musixBE.models.social.Post;
 import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.user.User;
-import com.example.musixBE.payloads.requests.social.comment.CreateCommentRequest;
 import com.example.musixBE.payloads.requests.social.post.DeleteCommentRequest;
 import com.example.musixBE.payloads.requests.social.post.PostRequest;
 import com.example.musixBE.payloads.responses.Response;
@@ -100,7 +99,10 @@ public class PostService {
                 post.setThumbnailUrl(thumbnailUrl);
             }
             postRepository.save(post);
-            return Response.<PostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).build();
+            return Response.<PostBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .data(PostBody.builder().post(musixMapper.postToPostDTO(post)).build())
+                    .msg(StatusList.successService.getMsg()).build();
         } catch (IOException e) {
             return Response.<PostBody>builder().status(400).msg(e.getMessage()).build();
         }
@@ -156,10 +158,12 @@ public class PostService {
                 post.setThumbnailId(newThumbnailId);
                 post.setThumbnailUrl(newThumbnailUrl);
             }
+            post.setLastModified(System.currentTimeMillis());
             postRepository.save(post);
             return Response.<PostBody>builder()
                     .status(StatusList.successService.getStatus())
                     .msg(StatusList.successService.getMsg())
+                    .data(PostBody.builder().post(musixMapper.postToPostDTO(post)).build())
                     .build();
         } catch (IOException e) {
             return Response.<PostBody>builder()
@@ -199,48 +203,6 @@ public class PostService {
 
         postRepository.save(post);
 
-        return Response.<PostBody>builder()
-                .status(StatusList.successService.getStatus())
-                .msg(StatusList.successService.getMsg())
-                .build();
-    }
-
-    public Response<PostBody> createComment(String postId,
-                                            CreateCommentRequest request,
-                                            String bearerToken) {
-        String username = jwtService.extractUsername(bearerToken.substring(7));
-        boolean isUserExisted = userRepository.findByUsername(username).isPresent();
-        if (!isUserExisted || username == null) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorUsernameNotFound.getStatus())
-                    .msg(StatusList.errorUsernameNotFound.getMsg())
-                    .build();
-        }
-        boolean isPostExisted = postRepository.findById(postId).isPresent();
-        if (!isPostExisted) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorPostNotFound.getStatus())
-                    .msg(StatusList.errorPostNotFound.getMsg())
-                    .build();
-        }
-        User user = userRepository.findByUsername(username).get();
-        Post post = postRepository.findById(postId).get();
-        Comment comment = Comment.builder()
-                .ownerId(user.getId())
-                .ownerUsername(user.getUsername())
-                .replies(new ArrayList<>())
-                .likedBy(new ArrayList<>())
-                .dateCreated(System.currentTimeMillis())
-                .lastModified(System.currentTimeMillis())
-                .content(request.getContent())
-                // is author should be set as true in the reply API
-                .isAuthor(false)
-                .build();
-        commentRepository.save(comment);
-        List<String> commentsId = post.getComments();
-        commentsId.add(comment.getId());
-        post.setComments(commentsId);
-        postRepository.save(post);
         return Response.<PostBody>builder()
                 .status(StatusList.successService.getStatus())
                 .msg(StatusList.successService.getMsg())
