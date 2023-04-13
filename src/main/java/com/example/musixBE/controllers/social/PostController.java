@@ -21,6 +21,13 @@ public class PostController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @GetMapping("/posts")
+    public ResponseEntity<Response<ListPostBody>> getPosts(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                           @RequestParam(value = "size", defaultValue = "0") int size) {
+        Response<ListPostBody> response = postService.getPosts(page, size);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @GetMapping("/{postId}")
     public ResponseEntity<Response<PostBody>> getPostById(@PathVariable("postId") String postId) {
         Response<PostBody> response = postService.getPostById(postId);
@@ -28,8 +35,10 @@ public class PostController {
     }
 
     @GetMapping()
-    public ResponseEntity<Response<ListPostBody>> getPostsByUsername(@RequestParam("username") String username) {
-        Response<ListPostBody> response = postService.getPostsByUsername(username);
+    public ResponseEntity<Response<ListPostBody>> getPostsByUsername(@RequestParam("username") String username,
+                                                                     @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                     @RequestParam(value = "size", defaultValue = "5") int size) {
+        Response<ListPostBody> response = postService.getPostsByUsername(username, page, size);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
