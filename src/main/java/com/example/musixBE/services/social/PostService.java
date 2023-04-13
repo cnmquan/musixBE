@@ -1,10 +1,8 @@
 package com.example.musixBE.services.social;
 
-import com.example.musixBE.models.social.Comment;
 import com.example.musixBE.models.social.Post;
 import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.user.User;
-import com.example.musixBE.payloads.requests.social.post.DeleteCommentRequest;
 import com.example.musixBE.payloads.requests.social.post.PostRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.social.ListPostBody;
@@ -18,6 +16,8 @@ import com.example.musixBE.utils.CommentUtils;
 import com.example.musixBE.utils.FileType;
 import com.example.musixBE.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class PostService {
 
     }
 
-    public Response<ListPostBody> getPostsByUsername(String username) {
+    public Response<ListPostBody> getPostsByUsername(String username, int page, int size) {
         var user = userRepository.findByUsername(username);
         if (user.isEmpty()) {
             return Response.<ListPostBody>builder()
@@ -60,7 +60,7 @@ public class PostService {
                     .msg(StatusList.errorUsernameNotFound.getMsg())
                     .build();
         }
-        var posts = postRepository.findByUsername(user.get().getUsername());
+        var posts = postRepository.findByUsername(user.get().getUsername(), PageRequest.of(page, size, Sort.by("dateCreated").ascending()));
         return Response.<ListPostBody>builder()
                 .status(StatusList.successService.getStatus())
                 .msg(StatusList.successService.getMsg())
@@ -210,7 +210,6 @@ public class PostService {
     }
 
 
-
     public Response<PostBody> deletePost(String postId, String bearerToken) {
         String username = jwtService.extractUsername(bearerToken.substring(7));
         boolean isUserExisted = userRepository.findByUsername(username).isPresent();
@@ -251,5 +250,22 @@ public class PostService {
                 .msg(StatusList.successService.getMsg())
                 .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts)))
                 .build();
+    }
+
+    public Response<ListPostBody> getPosts(int page, int size) {
+        try {
+            List<Post> posts = postRepository.findAll(PageRequest.of(page, size)).stream().toList();
+            return Response.<ListPostBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts)))
+                    .build();
+        } catch (Exception e) {
+            return Response.<ListPostBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(new ListPostBody(musixMapper.listPostToListPostDTO(new ArrayList<>())))
+                    .build();
+        }
     }
 }
