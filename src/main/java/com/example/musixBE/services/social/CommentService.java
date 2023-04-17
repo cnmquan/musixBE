@@ -184,6 +184,7 @@ public class CommentService {
         commentRepository.save(comment.get());
         return Response.<CommentBody>builder()
                 .status(StatusList.successService.getStatus())
+                .data(CommentBody.builder().comment(musixMapper.commentToCommentDTO(comment.get())).build())
                 .msg(StatusList.successService.getMsg())
                 .build();
     }
