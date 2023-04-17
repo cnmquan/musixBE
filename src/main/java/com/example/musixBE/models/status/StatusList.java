@@ -17,4 +17,5 @@ public class StatusList {
     public static final StatusData errorUsernameDoesNotMatch = new StatusData(463, "Username Does Not Match");
     public static final StatusData errorPostNotFound = new StatusData(464, "Post Not Found");
     public static final StatusData errorCommentNotFoundOnProvidedPost = new StatusData(465, "Comment Not Found On Provided Post");
+    public static final StatusData errorReplyNotFoundOnProvidedComment = new StatusData(466, "Reply Not Found On Provided Comment");
 }
