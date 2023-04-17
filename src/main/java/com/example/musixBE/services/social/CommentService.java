@@ -9,7 +9,9 @@ import com.example.musixBE.payloads.requests.social.comment.DeleteCommentRequest
 import com.example.musixBE.payloads.requests.social.comment.DeleteReplyRequest;
 import com.example.musixBE.payloads.requests.social.comment.ModifyCommentRequest;
 import com.example.musixBE.payloads.responses.Response;
+import com.example.musixBE.payloads.responses.music.ListPlaylistBody;
 import com.example.musixBE.payloads.responses.social.CommentBody;
+import com.example.musixBE.payloads.responses.social.ListCommentBody;
 import com.example.musixBE.repositories.CommentRepository;
 import com.example.musixBE.repositories.PostRepository;
 import com.example.musixBE.repositories.UserRepository;
@@ -284,5 +286,71 @@ public class CommentService {
                 .status(StatusList.successService.getStatus())
                 .msg(StatusList.successService.getMsg())
                 .build();
+    }
+
+    public Response<ListCommentBody> getCommentsByPost(String postId) {
+        try {
+            final var post = postRepository.findById(postId).orElseThrow(() -> new Exception(StatusList.errorPostNotFound.getMsg()));
+            final var comments = new ArrayList<Comment>();
+            for(var commentId : post.getComments()){
+                final var comment = commentRepository.findById(commentId).orElseThrow(() -> new Exception(StatusList.errorCommentNotFoundOnProvidedPost.getMsg()));
+                comments.add(comment);
+            }
+            return Response.<ListCommentBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(new ListCommentBody(musixMapper.commentListToCommentDTOList(comments)))
+                    .build();
+        } catch (Exception e) {
+            if (e.getMessage().equals(StatusList.errorPostNotFound.getMsg())) {
+                return Response.<ListCommentBody>builder()
+                        .status(StatusList.errorPostNotFound.getStatus())
+                        .msg(StatusList.errorPostNotFound.getMsg())
+                        .build();
+            } else if (e.getMessage().equals(StatusList.errorCommentNotFoundOnProvidedPost.getMsg())) {
+                return Response.<ListCommentBody>builder()
+                        .status(StatusList.errorCommentNotFoundOnProvidedPost.getStatus())
+                        .msg(StatusList.errorCommentNotFoundOnProvidedPost.getMsg())
+                        .build();
+            }else {
+                return Response.<ListCommentBody>builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(e.getMessage())
+                        .build();
+            }
+        }
+    }
+
+    public Response<ListCommentBody> getReplyCommentByComment(String commentId) {
+        try {
+            final var comment = commentRepository.findById(commentId).orElseThrow(() -> new Exception(StatusList.errorCommentNotFound.getMsg()));
+            final var replyComments = new ArrayList<Comment>();
+            for(var replyId : comment.getReplies()){
+                final var reply = commentRepository.findById(replyId).orElseThrow(() -> new Exception(StatusList.errorReplyNotFoundOnProvidedComment.getMsg()));
+                replyComments.add(reply);
+            }
+            return Response.<ListCommentBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(new ListCommentBody(musixMapper.commentListToCommentDTOList(replyComments)))
+                    .build();
+        } catch (Exception e) {
+            if (e.getMessage().equals(StatusList.errorCommentNotFound.getMsg())) {
+                return Response.<ListCommentBody>builder()
+                        .status(StatusList.errorCommentNotFound.getStatus())
+                        .msg(StatusList.errorCommentNotFound.getMsg())
+                        .build();
+            } else if (e.getMessage().equals(StatusList.errorReplyNotFoundOnProvidedComment.getMsg())) {
+                return Response.<ListCommentBody>builder()
+                        .status(StatusList.errorReplyNotFoundOnProvidedComment.getStatus())
+                        .msg(StatusList.errorReplyNotFoundOnProvidedComment.getMsg())
+                        .build();
+            }else {
+                return Response.<ListCommentBody>builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(e.getMessage())
+                        .build();
+            }
+        }
     }
 }
