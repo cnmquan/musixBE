@@ -114,6 +114,7 @@ public class CommentService {
         return Response.<CommentBody>builder()
                 .status(StatusList.successService.getStatus())
                 .msg(StatusList.successService.getMsg())
+                .data(CommentBody.builder().comment(musixMapper.commentToCommentDTO(comment)).build())
                 .build();
     }
 
