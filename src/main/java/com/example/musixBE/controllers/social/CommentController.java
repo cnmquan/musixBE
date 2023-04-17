@@ -1,6 +1,8 @@
 package com.example.musixBE.controllers.social;
 
 import com.example.musixBE.payloads.requests.social.comment.CreateCommentRequest;
+import com.example.musixBE.payloads.requests.social.comment.DeleteCommentRequest;
+import com.example.musixBE.payloads.requests.social.comment.DeleteReplyRequest;
 import com.example.musixBE.payloads.requests.social.comment.ModifyCommentRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.social.CommentBody;
@@ -50,10 +52,17 @@ public class CommentController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @DeleteMapping("/{commentId}")
-    public ResponseEntity<Response<CommentBody>> delete(@PathVariable("commentId") String commentId,
+    @DeleteMapping()
+    public ResponseEntity<Response<CommentBody>> delete(@RequestBody DeleteCommentRequest request,
                                                         @RequestHeader("Authorization") String bearerToken) {
-        Response<CommentBody> response = commentService.delete(commentId, bearerToken);
+        Response<CommentBody> response = commentService.delete(request, bearerToken);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @DeleteMapping("/reply")
+    public ResponseEntity<Response<CommentBody>> deleteReply(@RequestBody DeleteReplyRequest request,
+                                                             @RequestHeader("Authorization") String bearerToken) {
+        Response<CommentBody> response = commentService.deleteReply(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

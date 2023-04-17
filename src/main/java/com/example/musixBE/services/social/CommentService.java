@@ -5,6 +5,8 @@ import com.example.musixBE.models.social.Post;
 import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.user.User;
 import com.example.musixBE.payloads.requests.social.comment.CreateCommentRequest;
+import com.example.musixBE.payloads.requests.social.comment.DeleteCommentRequest;
+import com.example.musixBE.payloads.requests.social.comment.DeleteReplyRequest;
 import com.example.musixBE.payloads.requests.social.comment.ModifyCommentRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.social.CommentBody;
@@ -184,12 +186,12 @@ public class CommentService {
         commentRepository.save(comment.get());
         return Response.<CommentBody>builder()
                 .status(StatusList.successService.getStatus())
-                .data(CommentBody.builder().comment(musixMapper.commentToCommentDTO(comment.get())).build())
+                .data(CommentBody.builder().comment(musixMapper.commentToCommentDTO(reply)).build())
                 .msg(StatusList.successService.getMsg())
                 .build();
     }
 
-    public Response<CommentBody> delete(String commentId, String bearerToken) {
+    public Response<CommentBody> delete(DeleteCommentRequest request, String bearerToken) {
         String username = jwtService.extractUsername(bearerToken.substring(7));
 
         if (username.isEmpty()) {
@@ -198,7 +200,7 @@ public class CommentService {
                     .msg(StatusList.errorUsernameNotFound.getMsg())
                     .build();
         }
-        var comment = commentRepository.findById(commentId);
+        var comment = commentRepository.findById(request.getCommentId());
         if (comment.isEmpty()) {
             return Response.<CommentBody>builder()
                     .status(StatusList.errorCommentNotFound.getStatus())
@@ -211,7 +213,25 @@ public class CommentService {
                     .msg(StatusList.errorUsernameDoesNotMatch.getMsg())
                     .build();
         }
-        commentUtils.deleteComment(commentId);
+        var post = postRepository.findById(request.getPostId());
+        if (post.isEmpty()) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorPostNotFound.getStatus())
+                    .msg(StatusList.errorPostNotFound.getMsg())
+                    .build();
+        }
+        if (!post.get().getComments().contains(request.getCommentId())) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorCommentNotFoundOnProvidedPost.getStatus())
+                    .msg(StatusList.errorCommentNotFoundOnProvidedPost.getMsg())
+                    .build();
+        }
+
+        List<String> comments = post.get().getComments();
+        comments.remove(request.getCommentId());
+        post.get().setComments(comments);
+        postRepository.save(post.get());
+        commentUtils.deleteComment(request.getCommentId());
         return Response.<CommentBody>builder()
                 .status(StatusList.successService.getStatus())
                 .msg(StatusList.successService.getMsg())
@@ -219,4 +239,49 @@ public class CommentService {
     }
 
 
+    public Response<CommentBody> deleteReply(DeleteReplyRequest request, String bearerToken) {
+        String username = jwtService.extractUsername(bearerToken.substring(7));
+
+        if (username.isEmpty()) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorUsernameNotFound.getStatus())
+                    .msg(StatusList.errorUsernameNotFound.getMsg())
+                    .build();
+        }
+        var reply = commentRepository.findById(request.getReplyId());
+        if (reply.isEmpty()) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorCommentNotFound.getStatus())
+                    .msg(StatusList.errorCommentNotFound.getMsg())
+                    .build();
+        }
+        if (!reply.get().getOwnerUsername().equals(username)) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorUsernameDoesNotMatch.getStatus())
+                    .msg(StatusList.errorUsernameDoesNotMatch.getMsg())
+                    .build();
+        }
+        var comment = commentRepository.findById(request.getCommentId());
+        if (comment.isEmpty()) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorCommentNotFound.getStatus())
+                    .msg(StatusList.errorCommentNotFound.getMsg())
+                    .build();
+        }
+        if (!comment.get().getReplies().contains(request.getReplyId())) {
+            return Response.<CommentBody>builder()
+                    .status(StatusList.errorReplyNotFoundOnProvidedComment.getStatus())
+                    .msg(StatusList.errorReplyNotFoundOnProvidedComment.getMsg())
+                    .build();
+        }
+
+        comment.get().getReplies().remove(reply.get().getId());
+        commentRepository.save(comment.get());
+        commentUtils.deleteComment(request.getReplyId());
+
+        return Response.<CommentBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .build();
+    }
 }
