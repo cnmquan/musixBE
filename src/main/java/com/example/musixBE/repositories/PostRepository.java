@@ -10,4 +10,7 @@ import java.util.List;
 public interface PostRepository extends MongoRepository<Post, String> {
     @Query("{'ownerUsername': ?0}")
     List<Post> findByUsername(String username, Pageable pageable);
+
+    @Query("{'content': /sai gon/}")
+    List<Post> findByContent(String query, Pageable pageable);
 }
