@@ -268,4 +268,22 @@ public class PostService {
                     .build();
         }
     }
+
+    public Response<ListPostBody> getPostByContent(String query, int page, int size) {
+        try {
+
+            List<Post> posts = postRepository.findByContent(query, PageRequest.of(page, size, Sort.by("dateCreated").descending()));
+            return Response.<ListPostBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts)))
+                    .build();
+        } catch (Exception e) {
+            return Response.<ListPostBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(new ListPostBody(new ArrayList<>()))
+                    .build();
+        }
+    }
 }

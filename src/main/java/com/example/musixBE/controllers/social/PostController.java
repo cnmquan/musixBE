@@ -70,4 +70,13 @@ public class PostController {
         Response<PostBody> response = postService.deletePost(postId, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @GetMapping("/by-content")
+    public ResponseEntity<Response<ListPostBody>> getPostsByContent(@RequestParam("query") String query,
+                                                                    @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                    @RequestParam(value = "size", defaultValue = "5") int size) {
+        Response<ListPostBody> response = postService.getPostByContent(query, page, size);
+        return ResponseEntity.status(response.getStatus()).body(response);
+
+    }
 }
