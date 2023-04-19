@@ -6,6 +6,7 @@ import com.example.musixBE.payloads.requests.social.comment.DeleteReplyRequest;
 import com.example.musixBE.payloads.requests.social.comment.ModifyCommentRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.social.CommentBody;
+import com.example.musixBE.payloads.responses.social.ListCommentBody;
 import com.example.musixBE.services.social.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,18 @@ public class CommentController {
     @GetMapping("/{commentId}")
     public ResponseEntity<Response<CommentBody>> getComment(@PathVariable("commentId") String commentId) {
         Response<CommentBody> response = commentService.getComment(commentId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping("/byPost/{postId}")
+    public ResponseEntity<Response<ListCommentBody>> getCommentsByPost(@PathVariable("postId") String postId) {
+        Response<ListCommentBody> response = commentService.getCommentsByPost(postId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping("/reply/byComment/{commentId}")
+    public ResponseEntity<Response<ListCommentBody>> getReplyCommentsByComment(@PathVariable("commentId") String commentId) {
+        Response<ListCommentBody> response = commentService.getReplyCommentByComment(commentId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
