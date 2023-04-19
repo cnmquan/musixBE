@@ -288,7 +288,7 @@ public class AuthenticationService {
         var validUserTokens = tokenRepository.findAllValidTokenByUserAndTokenType(user.getUsername(), tokenType.name());
         if (validUserTokens == null) return null;
         if (validUserTokens.isEmpty()) return null;
-        validUserTokens.sort((a, b) -> Math.toIntExact(b.getDateCreated() - a.getDateCreated()));
+        validUserTokens.sort((a, b) -> Math.toIntExact((b.getDateCreated() - a.getDateCreated()) / 1000000000));
         for (Token validUserToken : validUserTokens) {
             if (validUserToken.getDateExpired() < currentTimeInMillis) {
                 validUserToken.setExpired(true);
