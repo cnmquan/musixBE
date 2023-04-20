@@ -79,4 +79,12 @@ public class PostController {
         return ResponseEntity.status(response.getStatus()).body(response);
 
     }
+
+    @GetMapping("/following")
+    public ResponseEntity<Response<ListPostBody>> getPostsByFollowingUsers(@RequestHeader("Authorization") String bearerToken) {
+        Response<ListPostBody> response = postService.getPostsByFollowingUser(bearerToken);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+
 }
