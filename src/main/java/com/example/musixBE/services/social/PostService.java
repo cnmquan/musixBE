@@ -15,15 +15,21 @@ import com.example.musixBE.services.MusixMapper;
 import com.example.musixBE.utils.CommentUtils;
 import com.example.musixBE.utils.FileType;
 import com.example.musixBE.utils.FileUtils;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
 import lombok.RequiredArgsConstructor;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,38 +40,27 @@ public class PostService {
     private final JwtService jwtService;
     private final FileUtils fileUtils;
     private final CommentUtils commentUtils;
+    MongoClient mongoClient = MongoClients.create("mongodb+srv://user:123456aA@clustermusic.wqqweqo.mongodb.net/musix");
+    MongoDatabase database = mongoClient.getDatabase("musix");
+    MongoCollection<Document> collection = database.getCollection("posts");
     private final MusixMapper musixMapper = MusixMapper.INSTANCE;
 
     public Response<PostBody> getPostById(String postId) {
         var post = postRepository.findById(postId);
         if (post.isEmpty()) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorPostNotFound.getStatus())
-                    .msg(StatusList.errorPostNotFound.getMsg())
-                    .build();
+            return Response.<PostBody>builder().status(StatusList.errorPostNotFound.getStatus()).msg(StatusList.errorPostNotFound.getMsg()).build();
         }
-        return Response.<PostBody>builder()
-                .status(StatusList.successService.getStatus())
-                .msg(StatusList.successService.getMsg())
-                .data(new PostBody(musixMapper.postToPostDTO(post.get())))
-                .build();
+        return Response.<PostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new PostBody(musixMapper.postToPostDTO(post.get()))).build();
 
     }
 
     public Response<ListPostBody> getPostsByUsername(String username, int page, int size) {
         var user = userRepository.findByUsername(username);
         if (user.isEmpty()) {
-            return Response.<ListPostBody>builder()
-                    .status(StatusList.errorUsernameNotFound.getStatus())
-                    .msg(StatusList.errorUsernameNotFound.getMsg())
-                    .build();
+            return Response.<ListPostBody>builder().status(StatusList.errorUsernameNotFound.getStatus()).msg(StatusList.errorUsernameNotFound.getMsg()).build();
         }
         var posts = postRepository.findByUsername(user.get().getUsername(), PageRequest.of(page, size, Sort.by("dateCreated").ascending()));
-        return Response.<ListPostBody>builder()
-                .status(StatusList.successService.getStatus())
-                .msg(StatusList.successService.getMsg())
-                .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts)))
-                .build();
+        return Response.<ListPostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new ListPostBody(musixMapper.listPostToListPostDTO(posts))).build();
     }
 
     public Response<PostBody> createPost(PostRequest request, String bearerToken) {
@@ -80,18 +75,7 @@ public class PostService {
             User user = userRepository.findByUsername(username).get();
             var dataUrl = fileUtils.upload(request.getFile(), sourceId);
 
-            Post post = Post.builder()
-                    .ownerId(user.getId())
-                    .ownerUsername(user.getUsername())
-                    .fileId(sourceId)
-                    .fileName(request.getFileName())
-                    .comments(new ArrayList<>())
-                    .content(request.getContent())
-                    .dateCreated(System.currentTimeMillis())
-                    .lastModified(System.currentTimeMillis())
-                    .likedBy(new ArrayList<>())
-                    .fileUrl(dataUrl)
-                    .build();
+            Post post = Post.builder().ownerId(user.getId()).ownerUsername(user.getUsername()).fileId(sourceId).fileName(request.getFileName()).comments(new ArrayList<>()).content(request.getContent()).dateCreated(System.currentTimeMillis()).lastModified(System.currentTimeMillis()).likedBy(new ArrayList<>()).fileUrl(dataUrl).build();
             if (request.getThumbnail() != null) {
                 var thumbnailId = username + "/social/post/thumbnail/" + cloudId;
                 var thumbnailUrl = fileUtils.upload(request.getThumbnail(), thumbnailId);
@@ -99,10 +83,7 @@ public class PostService {
                 post.setThumbnailUrl(thumbnailUrl);
             }
             postRepository.save(post);
-            return Response.<PostBody>builder()
-                    .status(StatusList.successService.getStatus())
-                    .data(PostBody.builder().post(musixMapper.postToPostDTO(post)).build())
-                    .msg(StatusList.successService.getMsg()).build();
+            return Response.<PostBody>builder().status(StatusList.successService.getStatus()).data(PostBody.builder().post(musixMapper.postToPostDTO(post)).build()).msg(StatusList.successService.getMsg()).build();
         } catch (IOException e) {
             return Response.<PostBody>builder().status(400).msg(e.getMessage()).build();
         }
@@ -114,25 +95,17 @@ public class PostService {
             final String username = jwtService.extractUsername(bearerToken.substring(7));
             boolean isUserExisted = userRepository.findByUsername(username).isPresent();
             if (!isUserExisted || username == null) {
-                return Response.<PostBody>builder()
-                        .status(StatusList.errorUsernameNotFound.getStatus())
-                        .msg(StatusList.errorUsernameNotFound.getMsg()).build();
+                return Response.<PostBody>builder().status(StatusList.errorUsernameNotFound.getStatus()).msg(StatusList.errorUsernameNotFound.getMsg()).build();
             }
 
             boolean isPostExisted = postRepository.findById(postId).isPresent();
             if (!isPostExisted) {
-                return Response.<PostBody>builder()
-                        .status(StatusList.errorPostNotFound.getStatus())
-                        .msg(StatusList.errorPostNotFound.getMsg())
-                        .build();
+                return Response.<PostBody>builder().status(StatusList.errorPostNotFound.getStatus()).msg(StatusList.errorPostNotFound.getMsg()).build();
             }
 
             Post post = postRepository.findById(postId).get();
             if (!username.equals(post.getOwnerUsername())) {
-                return Response.<PostBody>builder()
-                        .status(StatusList.errorUsernameDoesNotMatch.getStatus())
-                        .msg(StatusList.errorUsernameDoesNotMatch.getMsg())
-                        .build();
+                return Response.<PostBody>builder().status(StatusList.errorUsernameDoesNotMatch.getStatus()).msg(StatusList.errorUsernameDoesNotMatch.getMsg()).build();
             }
             if (request.getContent() != null) {
                 post.setContent(request.getContent());
@@ -160,16 +133,9 @@ public class PostService {
             }
             post.setLastModified(System.currentTimeMillis());
             postRepository.save(post);
-            return Response.<PostBody>builder()
-                    .status(StatusList.successService.getStatus())
-                    .msg(StatusList.successService.getMsg())
-                    .data(PostBody.builder().post(musixMapper.postToPostDTO(post)).build())
-                    .build();
+            return Response.<PostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(PostBody.builder().post(musixMapper.postToPostDTO(post)).build()).build();
         } catch (IOException e) {
-            return Response.<PostBody>builder()
-                    .status(400)
-                    .msg(e.getMessage())
-                    .build();
+            return Response.<PostBody>builder().status(400).msg(e.getMessage()).build();
         }
 
 
@@ -179,17 +145,11 @@ public class PostService {
         String username = jwtService.extractUsername(bearerToken.substring(7));
         boolean isUserExisted = userRepository.findByUsername(username).isPresent();
         if (!isUserExisted || username == null) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorUsernameNotFound.getStatus())
-                    .msg(StatusList.errorUsernameNotFound.getMsg())
-                    .build();
+            return Response.<PostBody>builder().status(StatusList.errorUsernameNotFound.getStatus()).msg(StatusList.errorUsernameNotFound.getMsg()).build();
         }
         boolean isPostExisted = postRepository.findById(postId).isPresent();
         if (!isPostExisted) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorPostNotFound.getStatus())
-                    .msg(StatusList.errorPostNotFound.getMsg())
-                    .build();
+            return Response.<PostBody>builder().status(StatusList.errorPostNotFound.getStatus()).msg(StatusList.errorPostNotFound.getMsg()).build();
         }
         Post post = postRepository.findById(postId).get();
         User user = userRepository.findByUsername(username).get();
@@ -203,10 +163,7 @@ public class PostService {
 
         postRepository.save(post);
 
-        return Response.<PostBody>builder()
-                .status(StatusList.successService.getStatus())
-                .msg(StatusList.successService.getMsg())
-                .build();
+        return Response.<PostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).build();
     }
 
 
@@ -214,58 +171,34 @@ public class PostService {
         String username = jwtService.extractUsername(bearerToken.substring(7));
         boolean isUserExisted = userRepository.findByUsername(username).isPresent();
         if (!isUserExisted || username == null) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorUsernameNotFound.getStatus())
-                    .msg(StatusList.errorUsernameNotFound.getMsg())
-                    .build();
+            return Response.<PostBody>builder().status(StatusList.errorUsernameNotFound.getStatus()).msg(StatusList.errorUsernameNotFound.getMsg()).build();
         }
         boolean isPostExisted = postRepository.findById(postId).isPresent();
         if (!isPostExisted) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorPostNotFound.getStatus())
-                    .msg(StatusList.errorPostNotFound.getMsg())
-                    .build();
+            return Response.<PostBody>builder().status(StatusList.errorPostNotFound.getStatus()).msg(StatusList.errorPostNotFound.getMsg()).build();
         }
         Post post = postRepository.findById(postId).get();
         if (!post.getOwnerUsername().equals(username)) {
-            return Response.<PostBody>builder()
-                    .status(StatusList.errorUsernameDoesNotMatch.getStatus())
-                    .msg(StatusList.errorUsernameDoesNotMatch.getMsg())
-                    .build();
+            return Response.<PostBody>builder().status(StatusList.errorUsernameDoesNotMatch.getStatus()).msg(StatusList.errorUsernameDoesNotMatch.getMsg()).build();
         }
         List<String> commentsId = post.getComments();
         commentsId.forEach(commentUtils::deleteComment);
         postRepository.deleteById(postId);
-        return Response.<PostBody>builder()
-                .status(StatusList.successService.getStatus())
-                .msg(StatusList.successService.getMsg())
-                .build();
+        return Response.<PostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).build();
     }
 
 
     public Response<ListPostBody> getAllPost() {
         var posts = postRepository.findAll();
-        return Response.<ListPostBody>builder()
-                .status(StatusList.successService.getStatus())
-                .msg(StatusList.successService.getMsg())
-                .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts)))
-                .build();
+        return Response.<ListPostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new ListPostBody(musixMapper.listPostToListPostDTO(posts))).build();
     }
 
     public Response<ListPostBody> getPosts(int page, int size) {
         try {
             List<Post> posts = postRepository.findAll(PageRequest.of(page, size)).stream().toList();
-            return Response.<ListPostBody>builder()
-                    .status(StatusList.successService.getStatus())
-                    .msg(StatusList.successService.getMsg())
-                    .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts)))
-                    .build();
+            return Response.<ListPostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new ListPostBody(musixMapper.listPostToListPostDTO(posts))).build();
         } catch (Exception e) {
-            return Response.<ListPostBody>builder()
-                    .status(StatusList.successService.getStatus())
-                    .msg(StatusList.successService.getMsg())
-                    .data(new ListPostBody(musixMapper.listPostToListPostDTO(new ArrayList<>())))
-                    .build();
+            return Response.<ListPostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new ListPostBody(musixMapper.listPostToListPostDTO(new ArrayList<>()))).build();
         }
     }
 
@@ -273,17 +206,57 @@ public class PostService {
         try {
 
             List<Post> posts = postRepository.findByContent(query, PageRequest.of(page, size, Sort.by("dateCreated").descending()));
-            return Response.<ListPostBody>builder()
-                    .status(StatusList.successService.getStatus())
-                    .msg(StatusList.successService.getMsg())
-                    .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts)))
-                    .build();
+            return Response.<ListPostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new ListPostBody(musixMapper.listPostToListPostDTO(posts))).build();
         } catch (Exception e) {
-            return Response.<ListPostBody>builder()
-                    .status(StatusList.successService.getStatus())
-                    .msg(StatusList.successService.getMsg())
-                    .data(new ListPostBody(new ArrayList<>()))
-                    .build();
+            return Response.<ListPostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new ListPostBody(new ArrayList<>())).build();
         }
+    }
+
+    public Response<ListPostBody> getPostsByFollowingUser(String bearerToken) {
+        String username = jwtService.extractUsername(bearerToken.substring(7));
+        boolean isUserExisted = userRepository.findByUsername(username).isPresent();
+        if (!isUserExisted) {
+            return Response.<ListPostBody>builder().status(StatusList.errorUsernameNotFound.getStatus()).msg(StatusList.errorUsernameNotFound.getMsg()).build();
+        }
+        List<User> miniVersionOfFollowings = userRepository.findByUsername(username).get().getFollowings();
+        List<String> followingUsernames = new ArrayList<>();
+        for (User following :
+                miniVersionOfFollowings) {
+            Optional<User> user = userRepository.findById(following.getId());
+            if (user.isEmpty()) {
+                continue;
+            }
+            followingUsernames.add(user.get().getUsername());
+        }
+
+        Bson filter = Filters.in("ownerUsername", followingUsernames);
+        var results = collection.aggregate(List.of(
+                Aggregates.match(filter)));
+        List<Post> posts = new ArrayList<>();
+        results.forEach(document -> posts.add(documentToPost(document)));
+        Collections.shuffle(posts);
+        return Response.<ListPostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts)))
+                .build();
+    }
+
+    Post documentToPost(Document document) {
+        return Post.builder()
+                .id(document.get("_id").toString())
+                .ownerId(document.get("ownerId").toString())
+                .ownerUsername(document.get("ownerUsername").toString())
+                .fileId(document.get("fileId").toString())
+                .thumbnailId(document.get("thumbnailId").toString())
+                .fileName(document.get("fileName").toString())
+                .content(document.get("content").toString())
+                .thumbnailUrl(document.get("thumbnailUrl").toString())
+                .comments(document.getList("comments", String.class))
+                .dateCreated(document.getLong("dateCreated"))
+                .lastModified(document.getLong("lastModified"))
+                .likedBy(document.getList("likedBy", String.class))
+                .fileUrl(document.get("fileUrl").toString())
+                .build();
     }
 }
