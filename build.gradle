@@ -58,6 +58,6 @@ heroku {
     appName = "morning-castle-48061"
     jdkVersion = 17
     processTypes(
-            web: "java -jar build/libs/my-app.jar"
+            web: "java -jar build/libs/musixBE-0.0.1-SNAPSHOT.jar"
     )
 }
