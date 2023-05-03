@@ -2,7 +2,6 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.0.2'
     id 'io.spring.dependency-management' version '1.1.0'
-    id "com.heroku.sdk.heroku-gradle" version "3.0.0"
 }
 
 group = 'com.example'
@@ -54,10 +53,4 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-heroku {
-    appName = "morning-castle-48061"
-    jdkVersion = 17
-    processTypes(
-            web: "java -jar build/libs/musixBE-0.0.1-SNAPSHOT.jar"
-    )
-}
+task stage(dependsOn: ['build', 'clean'])
