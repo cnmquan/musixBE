@@ -2,10 +2,7 @@ package com.example.musixBE.controllers.music;
 
 import com.example.musixBE.payloads.requests.music.*;
 import com.example.musixBE.payloads.responses.Response;
-import com.example.musixBE.payloads.responses.music.ListArtistBody;
-import com.example.musixBE.payloads.responses.music.ListPlaylistBody;
-import com.example.musixBE.payloads.responses.music.ListSongBody;
-import com.example.musixBE.payloads.responses.music.UserMusicBody;
+import com.example.musixBE.payloads.responses.music.*;
 import com.example.musixBE.services.music.MusicService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -110,6 +107,40 @@ public class MusicController {
             @RequestBody UploadSongPlaylistRequest request,
             @RequestHeader("Authorization") String bearerToken) {
         var response = service.uploadSongPlaylist(playlistId, request, bearerToken);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping("/record")
+    public ResponseEntity<Response<UserRecordBody>> getUserRecord(@RequestHeader("Authorization") String bearerToken) {
+        var response = service.getUserRecord( bearerToken);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PutMapping("/search-song/history")
+    public ResponseEntity<Response<SearchRecordBody>> saveSearchRecord(@RequestBody SaveSearchRecordRequest request,
+                                                                       @RequestHeader("Authorization") String bearerToken) {
+        var response = service.saveSearchRecord(request.getSearch(), bearerToken);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PutMapping("/recent-song/history")
+    public ResponseEntity<Response<SongRecordBody>> saveSongRecord(@RequestBody SaveSongRecordRequest request,
+                                                                       @RequestHeader("Authorization") String bearerToken) {
+        var response = service.saveSongRecord(request.getSongId(), bearerToken);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @DeleteMapping("/search-song/history")
+    public ResponseEntity<Response<Boolean>> deleteSearchRecord(@RequestBody DeleteSearchRecordRequest request,
+                                                                       @RequestHeader("Authorization") String bearerToken) {
+        var response = service.deleteSearchRecord(request, bearerToken);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @DeleteMapping("/recent-song/history")
+    public ResponseEntity<Response<Boolean>> deleteSongRecord(@RequestBody DeleteSongRecordRequest request,
+                                                                   @RequestHeader("Authorization") String bearerToken) {
+        var response = service.deleteSongRecord(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

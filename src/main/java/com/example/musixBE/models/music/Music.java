@@ -24,4 +24,6 @@ public class Music {
     private List<Playlist> favoritePlaylists;
     private List<Playlist> dislikePlaylist;
     private List<Playlist> ownPlaylists;
+    private List<String> searchRecord;
+    private List<String> songRecord;
 }
