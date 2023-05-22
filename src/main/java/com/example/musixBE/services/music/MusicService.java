@@ -5,10 +5,7 @@ import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.user.User;
 import com.example.musixBE.payloads.requests.music.*;
 import com.example.musixBE.payloads.responses.Response;
-import com.example.musixBE.payloads.responses.music.ListArtistBody;
-import com.example.musixBE.payloads.responses.music.ListPlaylistBody;
-import com.example.musixBE.payloads.responses.music.ListSongBody;
-import com.example.musixBE.payloads.responses.music.UserMusicBody;
+import com.example.musixBE.payloads.responses.music.*;
 import com.example.musixBE.repositories.MusicRepository;
 import com.example.musixBE.repositories.UserRepository;
 import com.example.musixBE.services.JwtService;
@@ -62,6 +59,8 @@ public class MusicService {
                         .favoritePlaylists(new ArrayList<>())
                         .favoriteSongs(new ArrayList<>())
                         .ownPlaylists(new ArrayList<>())
+                        .searchRecord(new ArrayList<>())
+                        .songRecord(new ArrayList<>())
                         .build();
                 var saveMusic = musicRepository.save(newMusic);
 
@@ -576,6 +575,174 @@ public class MusicService {
                         .build();
             } else {
                 return Response.<ListPlaylistBody>builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(e.getMessage())
+                        .build();
+            }
+        }
+    }
+
+    public Response<UserRecordBody> getUserRecord(String bearerToken) {
+        try {
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+
+            var music = musicRepository.findByUsername(username).orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+            if(music.getSearchRecord() == null && music.getSongRecord() == null){
+                music.setSearchRecord(new ArrayList<>());
+                music.setSongRecord(new ArrayList<>());
+                musicRepository.save(music);
+            }
+            return Response.<UserRecordBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(UserRecordBody.builder()
+                            .record(mapper.musicToRecordDTO(music))
+                            .build())
+                    .build();
+        } catch (Exception e) {
+            if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
+                return Response.<UserRecordBody>builder()
+                        .status(StatusList.errorUsernameNotFound.getStatus())
+                        .msg(StatusList.errorUsernameNotFound.getMsg())
+                        .build();
+            } else {
+                return Response.<UserRecordBody>builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(e.getMessage())
+                        .build();
+            }
+        }
+    }
+
+    public Response<SearchRecordBody> saveSearchRecord(String search, String bearerToken) {
+        try {
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var music = musicRepository.findByUsername(username)
+                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+            var searchRecord = music.getSearchRecord();
+            if(searchRecord.isEmpty() || !searchRecord.contains(search)){
+                searchRecord.add(search);
+                music.setSearchRecord(searchRecord);
+                musicRepository.save(music);
+            }
+            return Response.<SearchRecordBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(SearchRecordBody.builder()
+                            .search(search)
+                            .build())
+                    .build();
+
+        } catch (Exception e) {
+            if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
+                return Response.<SearchRecordBody>builder()
+                        .status(StatusList.errorUsernameNotFound.getStatus())
+                        .msg(StatusList.errorUsernameNotFound.getMsg())
+                        .build();
+            } else {
+                return Response.<SearchRecordBody>builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(e.getMessage())
+                        .build();
+            }
+        }
+    }
+
+    public Response<Boolean> deleteSearchRecord(DeleteSearchRecordRequest request, String bearerToken) {
+        try {
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var music = musicRepository.findByUsername(username)
+                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+            var searchRecord = music.getSearchRecord();
+            if(request.isDeleteAll()){
+                searchRecord.clear();
+            } else {
+                searchRecord.remove(request.getSearch());
+            }
+            music.setSearchRecord(searchRecord);
+            musicRepository.save(music);
+            return Response.<Boolean>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(true)
+                    .build();
+
+        } catch (Exception e) {
+            if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
+                return Response.<Boolean>builder()
+                        .status(StatusList.errorUsernameNotFound.getStatus())
+                        .msg(StatusList.errorUsernameNotFound.getMsg())
+                        .build();
+            } else {
+                return Response.<Boolean>builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(e.getMessage())
+                        .build();
+            }
+        }
+    }
+
+    public Response<SongRecordBody> saveSongRecord(String songId, String bearerToken) {
+        try {
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var music = musicRepository.findByUsername(username)
+                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+            var songRecord = music.getSongRecord();
+            if(songRecord.isEmpty() || !songRecord.contains(songId)){
+                songRecord.add(songId);
+                music.setSongRecord(songRecord);
+                musicRepository.save(music);
+            }
+            return Response.<SongRecordBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(SongRecordBody.builder()
+                            .song(songId)
+                            .build())
+                    .build();
+
+        } catch (Exception e) {
+            if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
+                return Response.<SongRecordBody>builder()
+                        .status(StatusList.errorUsernameNotFound.getStatus())
+                        .msg(StatusList.errorUsernameNotFound.getMsg())
+                        .build();
+            } else {
+                return Response.<SongRecordBody>builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(e.getMessage())
+                        .build();
+            }
+        }
+    }
+
+    public Response<Boolean> deleteSongRecord(DeleteSongRecordRequest request, String bearerToken) {
+        try {
+            final String username = jwtService.extractUsername(bearerToken.substring(7));
+            var music = musicRepository.findByUsername(username)
+                    .orElseThrow(() -> new Exception(StatusList.errorUsernameNotFound.getMsg()));
+            var songRecord = music.getSongRecord();
+            if(request.isDeleteAll()){
+                songRecord.clear();
+            } else {
+                songRecord.remove(request.getSongId());
+            }
+            music.setSongRecord(songRecord);
+            musicRepository.save(music);
+            return Response.<Boolean>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(true)
+                    .build();
+
+        } catch (Exception e) {
+            if(e.getMessage().equals(StatusList.errorUsernameNotFound.getMsg())){
+                return Response.<Boolean>builder()
+                        .status(StatusList.errorUsernameNotFound.getStatus())
+                        .msg(StatusList.errorUsernameNotFound.getMsg())
+                        .build();
+            } else {
+                return Response.<Boolean>builder()
                         .status(StatusList.errorService.getStatus())
                         .msg(e.getMessage())
                         .build();

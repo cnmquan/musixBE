@@ -60,4 +60,6 @@ public interface MusixMapper {
     PostDTO postToPostDTO(Post post);
 
     List<PostDTO> listPostToListPostDTO(List<Post> posts);
+
+    RecordDTO musicToRecordDTO(Music music);
 }
