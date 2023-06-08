@@ -11,6 +11,6 @@ public interface PostRepository extends MongoRepository<Post, String> {
     @Query("{'ownerUsername': ?0}")
     List<Post> findByUsername(String username, Pageable pageable);
 
-    @Query("{'content': /sai gon/}")
+    @Query("{'content': {'$regex':?0, $options:'i'}}")
     List<Post> findByContent(String query, Pageable pageable);
 }
