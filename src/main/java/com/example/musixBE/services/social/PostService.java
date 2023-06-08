@@ -206,7 +206,10 @@ public class PostService {
         try {
 
             List<Post> posts = postRepository.findByContent(query, PageRequest.of(page, size, Sort.by("dateCreated").descending()));
-            return Response.<ListPostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new ListPostBody(musixMapper.listPostToListPostDTO(posts))).build();
+            return Response.<ListPostBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts))).build();
         } catch (Exception e) {
             return Response.<ListPostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new ListPostBody(new ArrayList<>())).build();
         }
@@ -242,6 +245,19 @@ public class PostService {
                 .build();
     }
 
+    public Response<ListPostBody> getTrendingPosts(int page, int size) {
+        try {
+            List<Post> posts = postRepository.findAll(PageRequest.of(page, size, Sort.by("likedBy").descending())).stream().toList();
+            return Response.<ListPostBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(new ListPostBody(musixMapper.listPostToListPostDTO(posts))).build();
+        } catch (Exception e) {
+            return Response.<ListPostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new ListPostBody(new ArrayList<>())).build();
+
+        }
+    }
+
     Post documentToPost(Document document) {
         return Post.builder()
                 .id(document.get("_id").toString())
@@ -259,4 +275,6 @@ public class PostService {
                 .fileUrl(document.get("fileUrl").toString())
                 .build();
     }
+
+
 }

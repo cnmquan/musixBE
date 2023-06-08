@@ -86,5 +86,10 @@ public class PostController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-
+    @GetMapping("/trending")
+    public ResponseEntity<Response<ListPostBody>> getTrendingPosts(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                                   @RequestParam(value = "size", defaultValue = "5") int size) {
+        Response<ListPostBody> response = postService.getTrendingPosts(page, size);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }
