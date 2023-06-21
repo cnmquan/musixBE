@@ -112,7 +112,7 @@ public class MusicController {
 
     @GetMapping("/record")
     public ResponseEntity<Response<UserRecordBody>> getUserRecord(@RequestHeader("Authorization") String bearerToken) {
-        var response = service.getUserRecord( bearerToken);
+        var response = service.getUserRecord(bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -125,22 +125,28 @@ public class MusicController {
 
     @PutMapping("/recent-song/history")
     public ResponseEntity<Response<SongRecordBody>> saveSongRecord(@RequestBody SaveSongRecordRequest request,
-                                                                       @RequestHeader("Authorization") String bearerToken) {
+                                                                   @RequestHeader("Authorization") String bearerToken) {
         var response = service.saveSongRecord(request.getSongId(), bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @DeleteMapping("/search-song/history")
     public ResponseEntity<Response<Boolean>> deleteSearchRecord(@RequestBody DeleteSearchRecordRequest request,
-                                                                       @RequestHeader("Authorization") String bearerToken) {
+                                                                @RequestHeader("Authorization") String bearerToken) {
         var response = service.deleteSearchRecord(request, bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @DeleteMapping("/recent-song/history")
     public ResponseEntity<Response<Boolean>> deleteSongRecord(@RequestBody DeleteSongRecordRequest request,
-                                                                   @RequestHeader("Authorization") String bearerToken) {
+                                                              @RequestHeader("Authorization") String bearerToken) {
         var response = service.deleteSongRecord(request, bearerToken);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping("/song-record/top-10")
+    public ResponseEntity<Response> getTop10MostListenedSong(@RequestHeader("Authorization") String bearerToken) {
+        var response = service.getTop10MostListenedSong(bearerToken);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }
