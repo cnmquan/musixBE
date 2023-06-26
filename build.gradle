@@ -37,6 +37,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.5.3.Final'
     implementation 'com.cloudinary:cloudinary-http44:1.32.2'
     implementation 'com.cloudinary:cloudinary-taglib:1.32.2'
+    implementation 'com.github.jsimone:webapp-runner:9.0.31.0'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
     compileOnly 'org.projectlombok:lombok'
@@ -47,7 +48,17 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 }
+task stage() {
+    dependsOn clean, war
+}
+war.mustRunAfter clean
 
+task copyToLib(type: Copy) {
+    into "$buildDir/server"
+    from(configurations.compile) {
+        include "webapp-runner*"
+    }
+}
 tasks.named('test') {
     useJUnitPlatform()
 }
