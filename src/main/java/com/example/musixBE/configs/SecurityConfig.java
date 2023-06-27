@@ -26,6 +26,8 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
 
     private final LogoutHandler logoutHandler;
+    public String crossOriginAllowedHeaders = "header1,header2, *";
+    public String crossOriginAllowedSites = "site1,site2, * ";
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -38,6 +40,15 @@ public class SecurityConfig {
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .headers()
+                .frameOptions()
+                .sameOrigin()
+                .addHeaderWriter(((request, response) -> {
+                    response.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, private");
+                    response.setHeader("Pragma", "no-cache");
+                    response.setHeader("Access-Control-Allow-Origin", this.crossOriginAllowedSites);
+                }))
                 .and()
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
