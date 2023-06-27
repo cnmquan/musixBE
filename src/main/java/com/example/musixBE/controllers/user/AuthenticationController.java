@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@CrossOrigin(origins = {"https://musix-be-7e6a65eaaa35.herokuapp.com"}, allowCredentials = "true")
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService service;
