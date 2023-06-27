@@ -49,9 +49,8 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
 }
 
-jar {
-    baseName = 'musixBE'
-    version = '0.0.1'
+jar{
+    enabled = false
 }
 
 tasks.named('test') {
