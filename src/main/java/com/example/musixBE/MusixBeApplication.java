@@ -11,6 +11,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebMvc
 @Configuration
 @ComponentScan
+@SpringBootApplication
 public class MusixBeApplication {
 
     public static void main(String[] args) {
