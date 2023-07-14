@@ -1,10 +1,7 @@
 package com.example.musixBE.services;
 
 import com.example.musixBE.models.music.*;
-import com.example.musixBE.models.social.Comment;
-import com.example.musixBE.models.social.CommentDTO;
-import com.example.musixBE.models.social.Post;
-import com.example.musixBE.models.social.PostDTO;
+import com.example.musixBE.models.social.*;
 import com.example.musixBE.models.token.Token;
 import com.example.musixBE.models.token.TokenDTO;
 import com.example.musixBE.models.user.Profile;
@@ -62,4 +59,6 @@ public interface MusixMapper {
     List<PostDTO> listPostToListPostDTO(List<Post> posts);
 
     RecordDTO musicToRecordDTO(Music music);
+
+    ReportPostDTO reportPostToReportPostDTO(ReportPost reportPost);
 }
