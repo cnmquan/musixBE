@@ -2,18 +2,25 @@ package com.example.musixBE.services.user;
 
 import com.example.musixBE.models.status.StatusList;
 import com.example.musixBE.models.user.Profile;
+import com.example.musixBE.models.user.Role;
 import com.example.musixBE.models.user.User;
+import com.example.musixBE.models.user.UserDataDTO;
 import com.example.musixBE.payloads.requests.authentication.ChangePasswordRequest;
+import com.example.musixBE.payloads.requests.authentication.SetAdminRequest;
 import com.example.musixBE.payloads.requests.user.SearchProfileRequest;
 import com.example.musixBE.payloads.requests.user.UploadAvatarRequest;
 import com.example.musixBE.payloads.requests.user.UploadProfileRequest;
 import com.example.musixBE.payloads.responses.Response;
+import com.example.musixBE.payloads.responses.authentication.AuthenticationBody;
 import com.example.musixBE.payloads.responses.user.ListProfileBody;
+import com.example.musixBE.payloads.responses.user.ListUserDataBody;
 import com.example.musixBE.payloads.responses.user.ProfileBody;
+import com.example.musixBE.payloads.responses.user.UserDataBody;
 import com.example.musixBE.repositories.UserRepository;
 import com.example.musixBE.services.JwtService;
 import com.example.musixBE.services.MusixMapper;
 import com.example.musixBE.utils.FileUtils;
+import com.example.musixBE.utils.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +28,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,6 +45,8 @@ public class ProfileService {
     private final MusixMapper musixMapper = MusixMapper.INSTANCE;
 
     private final FileUtils fileUtils;
+
+    private final TokenUtils tokenUtils;
 
     private final JwtService jwtService;
 
@@ -308,6 +319,123 @@ public class ProfileService {
                 return Response.builder()
                         .status(StatusList.errorService.getStatus())
                         .msg(e.getMessage())
+                        .build();
+            }
+        }
+    }
+
+    public Response<ListUserDataBody> getUsers() {
+        try {
+            List<User> users = userRepository.findAll();
+            List<UserDataDTO> usersData = users.stream().map((user) -> {
+                return UserDataDTO.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .fullName(user.getProfile().getFullName())
+                        .role(user.getRole())
+                        .enable(user.isEnabled())
+                        .build();
+            }).toList();
+            return  Response.<ListUserDataBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(ListUserDataBody.builder()
+                            .users(usersData)
+                            .build())
+                    .build();
+        } catch (Exception e) {
+            return Response.<ListUserDataBody>builder()
+                    .status(StatusList.errorService.getStatus())
+                    .msg(e.getMessage())
+                    .build();
+        }
+    }
+
+    public Response<AuthenticationBody> setAdmin(SetAdminRequest request) {
+        // Check username is existed in database
+        boolean isExistedUser = userRepository.findByUsername(request.getUsername()).isEmpty();
+        if (!isExistedUser) {
+            // Catch username is existed in database
+            return Response.<AuthenticationBody>builder()
+                    .status(StatusList.errorUsernameExisted.getStatus())
+                    .msg(StatusList.errorUsernameExisted.getMsg())
+                    .build();
+        }
+
+        try {
+            var profile = Profile.builder()
+                    .fullName(request.getName())
+                    .build();
+            var user = User.builder()
+                    .username(request.getUsername())
+                    .profile(profile)
+                    .enabled(true)
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .followings(new ArrayList<>())
+                    .followers(new ArrayList<>())
+                    .role(Role.ADMIN)
+                    .build();
+
+            // Save user info to db
+            var userSaved = userRepository.save(user);
+
+            // Create jwt token and save token to db
+            var jwtToken = jwtService.generatedToken(user);
+            var token = tokenUtils.saveUserToken(userSaved, jwtToken);
+
+            // Response
+            return Response.<AuthenticationBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(AuthenticationBody.builder()
+                            .user(musixMapper.userToUserDTO(user))
+                            .token(musixMapper.tokenToTokenDTO(token))
+                            .build())
+                    .build();
+        } catch (Exception e) {
+            // Other Exception
+            return Response.<AuthenticationBody>builder()
+                    .status(StatusList.errorService.getStatus())
+                    .msg(StatusList.errorService.getMsg())
+                    .build();
+        }
+    }
+
+    public Response<UserDataBody> disableUser(String id) {
+        // Check username is existed in database
+
+        try {
+            var user = userRepository.findById(id).orElseThrow(() -> new Exception(StatusList.errorUserIdNotFound.getMsg()));
+            user.setEnabled(!user.isEnabled());
+            var userSaved = userRepository.save(user);
+            var userDataDTO = UserDataDTO.builder()
+                    .id(userSaved.getId())
+                    .email(userSaved.getEmail())
+                    .username(userSaved.getUsername())
+                    .fullName(userSaved.getProfile().getFullName())
+                    .role(userSaved.getRole())
+                    .enable(userSaved.isEnabled())
+                    .build();
+
+            return Response.<UserDataBody>builder()
+                    .status(StatusList.successService.getStatus())
+                    .msg(StatusList.successService.getMsg())
+                    .data(UserDataBody.builder()
+                            .user(userDataDTO)
+                            .build())
+                    .build();
+        }
+        catch (Exception e) {
+            if (e.getMessage().equals(StatusList.errorUserIdNotFound.getMsg())) {
+                return Response.<UserDataBody>builder()
+                        .status(StatusList.errorUserIdNotFound.getStatus())
+                        .msg(StatusList.errorUserIdNotFound.getMsg())
+                        .build();
+            } else {
+                return Response.<UserDataBody>builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(StatusList.errorService.getMsg())
                         .build();
             }
         }

@@ -6,10 +6,7 @@ import com.example.musixBE.models.token.TokenType;
 import com.example.musixBE.models.user.Profile;
 import com.example.musixBE.models.user.Role;
 import com.example.musixBE.models.user.User;
-import com.example.musixBE.payloads.requests.authentication.AuthenticationRequest;
-import com.example.musixBE.payloads.requests.authentication.LoginRequest;
-import com.example.musixBE.payloads.requests.authentication.RegisterRequest;
-import com.example.musixBE.payloads.requests.authentication.ResetPasswordRequest;
+import com.example.musixBE.payloads.requests.authentication.*;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.authentication.AuthenticationBody;
 import com.example.musixBE.payloads.responses.authentication.ConfirmationBody;
@@ -186,6 +183,10 @@ public class AuthenticationService {
             var user = userRepository.findByUsername(token.getUser().getUsername())
                     .orElseThrow(() -> new UsernameNotFoundException(StatusList.errorUsernameNotFound.getMsg()));
 
+            if(!user.isEnabled()){
+                throw new Exception(StatusList.errorAccountEnable.getMsg());
+            }
+
             if (!jwtService.isTokenValid(token.getToken(), user)) {
                 token.setExpired(true);
                 token.setRevoked(true);
@@ -217,6 +218,11 @@ public class AuthenticationService {
                         .status(StatusList.errorTokenNotValid.getStatus())
                         .msg(StatusList.errorTokenNotValid.getMsg())
                         .build();
+            } else if (e.getMessage().equals(StatusList.errorAccountEnable.getMsg())) {
+                return Response.<AuthenticationBody>builder()
+                        .status(StatusList.errorAccountEnable.getStatus())
+                        .msg(StatusList.errorAccountEnable.getMsg())
+                        .build();
             } else {
                 return Response.<AuthenticationBody>builder()
                         .status(StatusList.errorService.getStatus())
@@ -232,6 +238,11 @@ public class AuthenticationService {
             // Get User from Username
             var user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new UsernameNotFoundException(StatusList.errorUsernameNotFound.getMsg()));
+
+            if(!user.isEnabled()){
+                throw new Exception(StatusList.errorAccountEnable.getMsg());
+            }
+
             // Check Username and Password correct
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -274,11 +285,17 @@ public class AuthenticationService {
                     .msg(exception.getMessage())
                     .build();
         } catch (Exception e) {
-            System.out.println(e);
-            return Response.<AuthenticationBody>builder()
-                    .status(StatusList.errorService.getStatus())
-                    .msg(StatusList.errorService.getMsg())
-                    .build();
+            if (e.getMessage().equals(StatusList.errorAccountEnable.getMsg())) {
+                return Response.<AuthenticationBody>builder()
+                        .status(StatusList.errorAccountEnable.getStatus())
+                        .msg(StatusList.errorAccountEnable.getMsg())
+                        .build();
+            } else {
+                return Response.<AuthenticationBody>builder()
+                        .status(StatusList.errorService.getStatus())
+                        .msg(StatusList.errorService.getMsg())
+                        .build();
+            }
         }
 
     }
