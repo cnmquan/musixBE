@@ -22,6 +22,8 @@ public interface MusixMapper {
 
     UserDTO userToUserDTO(User user);
 
+    List<UserDTO> userListToUserDTOList(List<User> users);
+
     TokenDTO tokenToTokenDTO(Token token);
 
     ArtistDTO artistToArtistDTO(Artist artist);
