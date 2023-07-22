@@ -1,8 +1,10 @@
 package com.example.musixBE.services;
 
+import com.example.musixBE.models.social.Post;
 import com.example.musixBE.models.user.User;
 import com.example.musixBE.utils.EmailTemplateProvider;
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
@@ -50,5 +52,35 @@ public class EmailService implements EmailSender {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @Override
+    public void sendDeletedPostNotification(User user, Post post) {
+        MimeMessage message = mailSender.createMimeMessage();
+
+        try {
+            message.setFrom(new InternetAddress("admin@musix.com"));
+            message.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress(user.getEmail()));
+            message.setSubject("A post has been deleted");
+            message.setContent(EmailTemplateProvider.buildDeletedPostNotificationEmail(user.getUsername(), post.getContent(), post.getFileName()), "text/html; charset=utf-8");
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void sendActivatedPostNotification(User user, Post post) {
+        MimeMessage message = mailSender.createMimeMessage();
+
+        try {
+            message.setFrom(new InternetAddress("admin@musix.com"));
+            message.setRecipient(MimeMessage.RecipientType.TO, new InternetAddress(user.getEmail()));
+            message.setSubject("A post has been reactivated");
+            message.setContent(EmailTemplateProvider.buildReactivatedPostNotificationEmail(user.getUsername(), post.getContent(), post.getFileName()), "text/html; charset=utf-8");
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -934,4 +934,438 @@ public class EmailTemplateProvider {
                 "\n" +
                 "</html>";
     }
+
+    public static String buildDeletedPostNotificationEmail(String username, String content, String filename) {
+        return "<!DOCTYPE html>\n" +
+                "<html xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" lang=\"en\">\n" +
+                "\n" +
+                "<head>\n" +
+                "\t<title></title>\n" +
+                "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n" +
+                "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]-->\n" +
+                "\t<style>\n" +
+                "\t\t* {\n" +
+                "\t\t\tbox-sizing: border-box;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\tbody {\n" +
+                "\t\t\tmargin: 0;\n" +
+                "\t\t\tpadding: 0;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\ta[x-apple-data-detectors] {\n" +
+                "\t\t\tcolor: inherit !important;\n" +
+                "\t\t\ttext-decoration: inherit !important;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\t#MessageViewBody a {\n" +
+                "\t\t\tcolor: inherit;\n" +
+                "\t\t\ttext-decoration: none;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\tp {\n" +
+                "\t\t\tline-height: inherit\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\t.desktop_hide,\n" +
+                "\t\t.desktop_hide table {\n" +
+                "\t\t\tmso-hide: all;\n" +
+                "\t\t\tdisplay: none;\n" +
+                "\t\t\tmax-height: 0px;\n" +
+                "\t\t\toverflow: hidden;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\t.image_block img+div {\n" +
+                "\t\t\tdisplay: none;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\t@media (max-width:690px) {\n" +
+                "\t\t\t.desktop_hide table.icons-inner {\n" +
+                "\t\t\t\tdisplay: inline-block !important;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.icons-inner {\n" +
+                "\t\t\t\ttext-align: center;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.icons-inner td {\n" +
+                "\t\t\t\tmargin: 0 auto;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.row-content {\n" +
+                "\t\t\t\twidth: 100% !important;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.stack .column {\n" +
+                "\t\t\t\twidth: 100%;\n" +
+                "\t\t\t\tdisplay: block;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.mobile_hide {\n" +
+                "\t\t\t\tmax-width: 0;\n" +
+                "\t\t\t\tmin-height: 0;\n" +
+                "\t\t\t\tmax-height: 0;\n" +
+                "\t\t\t\tfont-size: 0;\n" +
+                "\t\t\t\tdisplay: none;\n" +
+                "\t\t\t\toverflow: hidden;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.desktop_hide,\n" +
+                "\t\t\t.desktop_hide table {\n" +
+                "\t\t\t\tmax-height: none !important;\n" +
+                "\t\t\t\tdisplay: table !important;\n" +
+                "\t\t\t}\n" +
+                "\t\t}\n" +
+                "\t</style>\n" +
+                "</head>\n" +
+                "\n" +
+                "<body style=\"text-size-adjust: none; background-color: #262345; margin: 0; padding: 0;\">\n" +
+                "\t<table class=\"nl-container\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #262345;\">\n" +
+                "\t\t<tbody>\n" +
+                "\t\t\t<tr>\n" +
+                "\t\t\t\t<td>\n" +
+                "\t\t\t\t\t<table class=\"row row-1\" align=\"center\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t<td>\n" +
+                "\t\t\t\t\t\t\t\t\t<table class=\"row-content stack\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000; background-color: #1e1c37; width: 670px; margin: 0 auto;\" width=\"670\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-1\" width=\"100%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"image_block block-1\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\" style=\"width:100%;padding-right:0px;padding-left:0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"alignment\" align=\"center\" style=\"line-height:10px\"><a href=\"www.example.com\" target=\"_blank\" style=\"outline:none\" tabindex=\"-1\"><img src=\"https://i.ibb.co/7nDJhT1/musiX.png\" style=\"height: auto; display: block; border: 0; max-width: 268px; width: 100%;\" width=\"268\" alt=\"company logo\" title=\"company logo\"></a></div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t<table class=\"row row-2\" align=\"center\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t<td>\n" +
+                "\t\t\t\t\t\t\t\t\t<table class=\"row-content stack\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000; background-color: #1e1c37; width: 670px; margin: 0 auto;\" width=\"670\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-1\" width=\"100%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-1\" style=\"height:40px;line-height:40px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"text_block block-2\" width=\"100%\" border=\"0\" cellpadding=\"10\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div style=\"font-family: Arial, sans-serif\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class style=\"font-size: 14px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; mso-line-height-alt: 16.8px; color: #fff; line-height: 1.2;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; text-align: center; font-size: 16px; mso-line-height-alt: 19.2px;\"><span style=\"font-size:28px;\">Hello " + username + " </span></p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; text-align: center; font-size: 16px; mso-line-height-alt: 16.8px;\">&nbsp;</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 19.2px;\">This email is sent to inform that a post with</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 16.8px;\">&nbsp;</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 19.2px;\">Content: " + content + " </p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 19.2px;\">Filename: " + filename + " </p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 16.8px;\">&nbsp;</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 19.2px;\">Has been deleted due to receiving a report</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 19.2px;\">If you thing that this is a mistake, feel free to contact us at thinhnguyendoan5122001@gmail.com</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t<table class=\"row row-3\" align=\"center\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t<td>\n" +
+                "\t\t\t\t\t\t\t\t\t<table class=\"row-content stack\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000; background-color: #1e1c37; width: 670px; margin: 0 auto;\" width=\"670\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-1\" width=\"33.333333333333336%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-1\" style=\"height:20px;line-height:20px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-2\" style=\"height:20px;line-height:20px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-2\" width=\"33.333333333333336%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-1\" style=\"height:20px;line-height:20px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-3\" width=\"33.333333333333336%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-1\" style=\"height:20px;line-height:20px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-2\" style=\"height:20px;line-height:20px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t<table class=\"row row-4\" align=\"center\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t<td>\n" +
+                "\t\t\t\t\t\t\t\t\t<table class=\"row-content stack\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000; background-color: #1e1c37; width: 670px; margin: 0 auto;\" width=\"670\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-1\" width=\"100%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"icons_block block-1\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\" style=\"vertical-align: middle; color: #9d9d9d; font-family: inherit; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"alignment\" style=\"vertical-align: middle; text-align: center;\"><!--[if vml]><table align=\"left\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;\"><![endif]-->\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<!--[if !vml]><!-->\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"icons-inner\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\"><!--<![endif]-->\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t</table>\n" +
+                "\t\t\t\t</td>\n" +
+                "\t\t\t</tr>\n" +
+                "\t\t</tbody>\n" +
+                "\t</table><!-- End -->\n" +
+                "</body>\n" +
+                "\n" +
+                "</html>";
+    }
+
+    public static String buildReactivatedPostNotificationEmail(String username, String content, String filename) {
+        return "<!DOCTYPE html>\n" +
+                "<html xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" lang=\"en\">\n" +
+                "\n" +
+                "<head>\n" +
+                "\t<title></title>\n" +
+                "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n" +
+                "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]-->\n" +
+                "\t<style>\n" +
+                "\t\t* {\n" +
+                "\t\t\tbox-sizing: border-box;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\tbody {\n" +
+                "\t\t\tmargin: 0;\n" +
+                "\t\t\tpadding: 0;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\ta[x-apple-data-detectors] {\n" +
+                "\t\t\tcolor: inherit !important;\n" +
+                "\t\t\ttext-decoration: inherit !important;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\t#MessageViewBody a {\n" +
+                "\t\t\tcolor: inherit;\n" +
+                "\t\t\ttext-decoration: none;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\tp {\n" +
+                "\t\t\tline-height: inherit\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\t.desktop_hide,\n" +
+                "\t\t.desktop_hide table {\n" +
+                "\t\t\tmso-hide: all;\n" +
+                "\t\t\tdisplay: none;\n" +
+                "\t\t\tmax-height: 0px;\n" +
+                "\t\t\toverflow: hidden;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\t.image_block img+div {\n" +
+                "\t\t\tdisplay: none;\n" +
+                "\t\t}\n" +
+                "\n" +
+                "\t\t@media (max-width:690px) {\n" +
+                "\t\t\t.desktop_hide table.icons-inner {\n" +
+                "\t\t\t\tdisplay: inline-block !important;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.icons-inner {\n" +
+                "\t\t\t\ttext-align: center;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.icons-inner td {\n" +
+                "\t\t\t\tmargin: 0 auto;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.row-content {\n" +
+                "\t\t\t\twidth: 100% !important;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.stack .column {\n" +
+                "\t\t\t\twidth: 100%;\n" +
+                "\t\t\t\tdisplay: block;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.mobile_hide {\n" +
+                "\t\t\t\tmax-width: 0;\n" +
+                "\t\t\t\tmin-height: 0;\n" +
+                "\t\t\t\tmax-height: 0;\n" +
+                "\t\t\t\tfont-size: 0;\n" +
+                "\t\t\t\tdisplay: none;\n" +
+                "\t\t\t\toverflow: hidden;\n" +
+                "\t\t\t}\n" +
+                "\n" +
+                "\t\t\t.desktop_hide,\n" +
+                "\t\t\t.desktop_hide table {\n" +
+                "\t\t\t\tmax-height: none !important;\n" +
+                "\t\t\t\tdisplay: table !important;\n" +
+                "\t\t\t}\n" +
+                "\t\t}\n" +
+                "\t</style>\n" +
+                "</head>\n" +
+                "\n" +
+                "<body style=\"text-size-adjust: none; background-color: #262345; margin: 0; padding: 0;\">\n" +
+                "\t<table class=\"nl-container\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #262345;\">\n" +
+                "\t\t<tbody>\n" +
+                "\t\t\t<tr>\n" +
+                "\t\t\t\t<td>\n" +
+                "\t\t\t\t\t<table class=\"row row-1\" align=\"center\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t<td>\n" +
+                "\t\t\t\t\t\t\t\t\t<table class=\"row-content stack\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000; background-color: #1e1c37; width: 670px; margin: 0 auto;\" width=\"670\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-1\" width=\"100%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"image_block block-1\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\" style=\"width:100%;padding-right:0px;padding-left:0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"alignment\" align=\"center\" style=\"line-height:10px\"><a href=\"www.example.com\" target=\"_blank\" style=\"outline:none\" tabindex=\"-1\"><img src=\"https://i.ibb.co/7nDJhT1/musiX.png\" style=\"height: auto; display: block; border: 0; max-width: 268px; width: 100%;\" width=\"268\" alt=\"company logo\" title=\"company logo\"></a></div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t<table class=\"row row-2\" align=\"center\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t<td>\n" +
+                "\t\t\t\t\t\t\t\t\t<table class=\"row-content stack\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000; background-color: #1e1c37; width: 670px; margin: 0 auto;\" width=\"670\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-1\" width=\"100%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-1\" style=\"height:40px;line-height:40px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"text_block block-2\" width=\"100%\" border=\"0\" cellpadding=\"10\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div style=\"font-family: Arial, sans-serif\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class style=\"font-size: 14px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; mso-line-height-alt: 16.8px; color: #fff; line-height: 1.2;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; text-align: center; font-size: 16px; mso-line-height-alt: 19.2px;\"><span style=\"font-size:28px;\">Hello " + username + " </span></p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; text-align: center; font-size: 16px; mso-line-height-alt: 16.8px;\">&nbsp;</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 19.2px;\">We're very excited to let you know that a post with content</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 16.8px;\">&nbsp;</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 19.2px;\">Content: " + content + " </p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 19.2px;\">Filename: " + filename + " </p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 16.8px;\">&nbsp;</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 19.2px;\">Has been successfully reactivated</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p style=\"margin: 0; font-size: 16px; text-align: left; mso-line-height-alt: 19.2px;\">If you thing need further information, feel free to contact us at thinhnguyendoan5122001@gmail.com</p>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t<table class=\"row row-3\" align=\"center\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t<td>\n" +
+                "\t\t\t\t\t\t\t\t\t<table class=\"row-content stack\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000; background-color: #1e1c37; width: 670px; margin: 0 auto;\" width=\"670\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-1\" width=\"33.333333333333336%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-1\" style=\"height:20px;line-height:20px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-2\" style=\"height:20px;line-height:20px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-2\" width=\"33.333333333333336%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-1\" style=\"height:20px;line-height:20px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-3\" width=\"33.333333333333336%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-1\" style=\"height:20px;line-height:20px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<div class=\"spacer_block block-2\" style=\"height:20px;line-height:20px;font-size:1px;\">&#8202;</div>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t<table class=\"row row-4\" align=\"center\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t<td>\n" +
+                "\t\t\t\t\t\t\t\t\t<table class=\"row-content stack\" align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000; background-color: #1e1c37; width: 670px; margin: 0 auto;\" width=\"670\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t<tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"column column-1\" width=\"100%\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; text-align: left; font-weight: 400; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"icons_block block-1\" width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"pad\" style=\"vertical-align: middle; color: #9d9d9d; font-family: inherit; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt;\">\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<td class=\"alignment\" style=\"vertical-align: middle; text-align: center;\"><!--[if vml]><table align=\"left\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;\"><![endif]-->\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<!--[if !vml]><!-->\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<table class=\"icons-inner\" style=\"mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\"><!--<![endif]-->\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t\t\t\t\t</table>\n" +
+                "\t\t\t\t\t\t\t\t</td>\n" +
+                "\t\t\t\t\t\t\t</tr>\n" +
+                "\t\t\t\t\t\t</tbody>\n" +
+                "\t\t\t\t\t</table>\n" +
+                "\t\t\t\t</td>\n" +
+                "\t\t\t</tr>\n" +
+                "\t\t</tbody>\n" +
+                "\t</table><!-- End -->\n" +
+                "</body>\n" +
+                "\n" +
+                "</html>";
+    }
 }

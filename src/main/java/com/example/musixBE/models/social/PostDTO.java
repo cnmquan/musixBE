@@ -1,5 +1,6 @@
 package com.example.musixBE.models.social;
 
+import com.example.musixBE.utils.PostStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,4 +41,6 @@ public class PostDTO {
     private List<String> likedBy;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String fileUrl;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private PostStatus postStatus;
 }
