@@ -1,9 +1,6 @@
 package com.example.musixBE.controllers.user;
 
-import com.example.musixBE.payloads.requests.authentication.AuthenticationRequest;
-import com.example.musixBE.payloads.requests.authentication.LoginRequest;
-import com.example.musixBE.payloads.requests.authentication.RegisterRequest;
-import com.example.musixBE.payloads.requests.authentication.ResetPasswordRequest;
+import com.example.musixBE.payloads.requests.authentication.*;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.authentication.AuthenticationBody;
 import com.example.musixBE.payloads.responses.authentication.ConfirmationBody;
