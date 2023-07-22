@@ -1,5 +1,6 @@
 package com.example.musixBE.models.social;
 
+import com.example.musixBE.utils.PostStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,4 +28,5 @@ public class Post {
     private Long lastModified;
     private List<String> likedBy;
     private String fileUrl;
+    private PostStatus postStatus;
 }

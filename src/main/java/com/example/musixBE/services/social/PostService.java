@@ -10,11 +10,13 @@ import com.example.musixBE.payloads.responses.social.PostBody;
 import com.example.musixBE.repositories.CommentRepository;
 import com.example.musixBE.repositories.PostRepository;
 import com.example.musixBE.repositories.UserRepository;
+import com.example.musixBE.services.EmailService;
 import com.example.musixBE.services.JwtService;
 import com.example.musixBE.services.MusixMapper;
 import com.example.musixBE.utils.CommentUtils;
 import com.example.musixBE.utils.FileType;
 import com.example.musixBE.utils.FileUtils;
+import com.example.musixBE.utils.PostStatus;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -40,6 +42,7 @@ public class PostService {
     private final JwtService jwtService;
     private final FileUtils fileUtils;
     private final CommentUtils commentUtils;
+    private final EmailService emailService;
     MongoClient mongoClient = MongoClients.create("mongodb+srv://user:123456aA@clustermusic.wqqweqo.mongodb.net/musix");
     MongoDatabase database = mongoClient.getDatabase("musix");
     MongoCollection<Document> collection = database.getCollection("posts");
@@ -75,7 +78,19 @@ public class PostService {
             User user = userRepository.findByUsername(username).get();
             var dataUrl = fileUtils.upload(request.getFile(), sourceId);
 
-            Post post = Post.builder().ownerId(user.getId()).ownerUsername(user.getUsername()).fileId(sourceId).fileName(request.getFileName()).comments(new ArrayList<>()).content(request.getContent()).dateCreated(System.currentTimeMillis()).lastModified(System.currentTimeMillis()).likedBy(new ArrayList<>()).fileUrl(dataUrl).build();
+            Post post = Post.builder()
+                    .ownerId(user.getId())
+                    .ownerUsername(user.getUsername())
+                    .fileId(sourceId)
+                    .fileName(request.getFileName())
+                    .comments(new ArrayList<>())
+                    .content(request.getContent())
+                    .dateCreated(System.currentTimeMillis())
+                    .lastModified(System.currentTimeMillis())
+                    .likedBy(new ArrayList<>())
+                    .fileUrl(dataUrl)
+                    .postStatus(PostStatus.open)
+                    .build();
             if (request.getThumbnail() != null) {
                 var thumbnailId = username + "/social/post/thumbnail/" + cloudId;
                 var thumbnailUrl = fileUtils.upload(request.getThumbnail(), thumbnailId);
@@ -83,7 +98,8 @@ public class PostService {
                 post.setThumbnailUrl(thumbnailUrl);
             }
             postRepository.save(post);
-            return Response.<PostBody>builder().status(StatusList.successService.getStatus()).data(PostBody.builder().post(musixMapper.postToPostDTO(post)).build()).msg(StatusList.successService.getMsg()).build();
+            return Response.<PostBody>builder().status(StatusList.successService.getStatus())
+                    .data(PostBody.builder().post(musixMapper.postToPostDTO(post)).build()).msg(StatusList.successService.getMsg()).build();
         } catch (IOException e) {
             return Response.<PostBody>builder().status(400).msg(e.getMessage()).build();
         }
@@ -256,6 +272,33 @@ public class PostService {
             return Response.<ListPostBody>builder().status(StatusList.successService.getStatus()).msg(StatusList.successService.getMsg()).data(new ListPostBody(new ArrayList<>())).build();
 
         }
+    }
+
+    public Response<PostBody> updatePostStatus(String postId) {
+        Optional<Post> post = postRepository.findById(postId);
+        if (post.isEmpty()) {
+            return Response.<PostBody>builder()
+                    .status(StatusList.errorPostNotFound.getStatus())
+                    .msg(StatusList.errorPostNotFound.getMsg()).build();
+        }
+        Optional<User> user = userRepository.findById(post.get().getOwnerId());
+        if (user.isEmpty()) {
+            return Response.<PostBody>builder().status(StatusList.errorUsernameNotFound.getStatus()).msg(StatusList.errorUsernameNotFound.getMsg()).build();
+        }
+        PostStatus postStatus = post.get().getPostStatus();
+        if (postStatus == PostStatus.open) {
+            emailService.sendDeletedPostNotification(user.get(), post.get());
+            post.get().setPostStatus(PostStatus.block);
+        } else {
+            emailService.sendActivatedPostNotification(user.get(), post.get());
+            post.get().setPostStatus(PostStatus.open);
+        }
+        postRepository.save(post.get());
+        return Response.<PostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .data(new PostBody(musixMapper.postToPostDTO(post.get())))
+                .build();
     }
 
     Post documentToPost(Document document) {

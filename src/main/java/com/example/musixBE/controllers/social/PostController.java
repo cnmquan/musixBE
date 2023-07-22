@@ -92,4 +92,10 @@ public class PostController {
         Response<ListPostBody> response = postService.getTrendingPosts(page, size);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @PutMapping("/status/{postId}")
+    public ResponseEntity<Response<PostBody>> updatePostStatus(@PathVariable String postId) {
+        Response<PostBody>response = postService.updatePostStatus(postId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }
