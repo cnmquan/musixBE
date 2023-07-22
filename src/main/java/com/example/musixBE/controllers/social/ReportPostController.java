@@ -1,6 +1,7 @@
 package com.example.musixBE.controllers.social;
 
 import com.example.musixBE.models.social.ReportPost;
+import com.example.musixBE.models.social.ReportPostDTO;
 import com.example.musixBE.payloads.requests.social.post.ReportPostRequest;
 import com.example.musixBE.payloads.responses.Response;
 import com.example.musixBE.payloads.responses.music.ListReportPostBody;
@@ -25,8 +26,8 @@ public class ReportPostController {
     }
 
     @PostMapping
-    public ResponseEntity<Response<ReportPost>> createNewReport(@RequestBody ReportPostRequest request) {
-        Response<ReportPost> response = reportPostService.createNewReport(request);
+    public ResponseEntity<Response<ReportPostDTO>> createNewReport(@RequestBody ReportPostRequest request) {
+        Response<ReportPostDTO> response = reportPostService.createNewReport(request);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

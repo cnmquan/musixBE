@@ -1,6 +1,7 @@
 package com.example.musixBE.repositories;
 
 import com.example.musixBE.models.user.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -22,4 +23,6 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     @Query("{'profile.fullName': {$regex: RegExp('?0', 'i')}}")
     List<Optional<User>> findByFullName(String fullName);
+
+    List<User> findAllByUsername(String query, Pageable pageable);
 }
