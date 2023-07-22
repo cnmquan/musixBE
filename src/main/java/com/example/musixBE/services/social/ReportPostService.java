@@ -30,17 +30,17 @@ public class ReportPostService {
     final UserRepository userRepository;
     final MusixMapper musixMapper = MusixMapper.INSTANCE;
 
-    public Response<ReportPost> createNewReport(ReportPostRequest request) {
+    public Response<ReportPostDTO> createNewReport(ReportPostRequest request) {
         final Optional<User> user = userRepository.findById(request.getUserId());
         final Optional<Post> post = postRepository.findById(request.getPostId());
         if (user.isEmpty()) {
-            return Response.<ReportPost>builder()
+            return Response.<ReportPostDTO>builder()
                     .status(StatusList.errorUserIdNotFound.getStatus())
                     .msg(StatusList.errorUserIdNotFound.getMsg())
                     .build();
         }
         if (post.isEmpty()) {
-            return Response.<ReportPost>builder()
+            return Response.<ReportPostDTO>builder()
                     .status(StatusList.errorPostNotFound.getStatus())
                     .msg(StatusList.errorPostNotFound.getMsg())
                     .build();
@@ -51,10 +51,52 @@ public class ReportPostService {
                 .reason(request.getReason())
                 .dateCreated(System.currentTimeMillis()).build();
         final var result = reportPostRepository.save(reportPost);
-        return Response.<ReportPost>builder()
+        System.out.println(result);
+        return Response.<ReportPostDTO>builder()
                 .status(StatusList.successService.getStatus())
                 .msg(StatusList.successService.getMsg())
-                .data(result)
+                .data((musixMapper.reportPostToReportPostDTO(result)))
+                .build();
+    }
+
+    public Response<ListReportPostBody> getReports() {
+        List<ReportPost> reportPosts = reportPostRepository.findAll();
+        List<ReportPostDTO> reportPostDTOS = new ArrayList<>();
+        for (ReportPost reportPost : reportPosts) {
+            reportPostDTOS.add(musixMapper.reportPostToReportPostDTO(reportPost));
+        }
+        return Response.<ListReportPostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .msg(StatusList.successService.getMsg())
+                .data(ListReportPostBody.builder().reportPosts(reportPostDTOS).build())
+                .build();
+    }
+
+    public Response<ListReportPostBody> getReportsByPostId(String postId) {
+
+        final Optional<Post> post = postRepository.findById(postId);
+        if (post.isEmpty()) {
+            return Response.<ListReportPostBody>builder()
+                    .status(StatusList.errorPostNotFound.getStatus())
+                    .msg(StatusList.errorPostNotFound.getMsg())
+                    .build();
+        }
+
+        final List<ReportPost> allReports = reportPostRepository.findAll();
+        List<ReportPost> reportPosts = new ArrayList<>();
+        for (ReportPost report : allReports) {
+            if (report.getPost().getId().equals(postId)) {
+                reportPosts.add(report);
+            }
+        }
+        List<ReportPostDTO> reportPostDTOS = new ArrayList<>();
+        for (ReportPost reportPost : reportPosts) {
+            reportPostDTOS.add(musixMapper.reportPostToReportPostDTO(reportPost));
+        }
+
+        return Response.<ListReportPostBody>builder()
+                .status(StatusList.successService.getStatus())
+                .data(new ListReportPostBody(reportPostDTOS))
                 .build();
     }
 
